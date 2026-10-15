@@ -295,3 +295,15 @@ For complete VPS setup, PaaS evaluation (Render, Railway, Fly.io, Neon), and dat
 - [SETUP_GUIDE.md](file:///c:/Users/KIIT/OneDrive/Documents/FindIt/docs/SETUP_GUIDE.md) — Developer setup instructions and troubleshooting.
 - [TESTING_GUIDE.md](file:///c:/Users/KIIT/OneDrive/Documents/FindIt/docs/TESTING_GUIDE.md) — Automated test suite breakdown and manual test plans.
 - [DEPLOYMENT_GUIDE.md](file:///c:/Users/KIIT/OneDrive/Documents/FindIt/docs/DEPLOYMENT_GUIDE.md) — Production Docker, VPS, cloud PaaS, backup and restore procedures.
+- [DEMO_GUIDE.md](file:///c:/Users/KIIT/OneDrive/Documents/FindIt/docs/DEMO_GUIDE.md) — 5-minute live demonstration script, test scenarios, and data reset guide.
+
+---
+
+## Author & Maintainer
+
+**Priyanshu Karan**  
+- B.Tech in Computer Science & Engineering, Kalinga Institute of Industrial Technology (KIIT), Bhubaneswar, Odisha, India  
+- GitHub: [@karan-rajput872](https://github.com/karan-rajput872)  
+- LinkedIn: [priyanshu-karan](https://www.linkedin.com/in/priyanshu-karan-417202390/)  
+- Email: `priyanshukaran25@gmail.com`
+
