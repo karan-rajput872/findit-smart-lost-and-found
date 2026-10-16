@@ -198,6 +198,21 @@ export async function checkBackendHealth(): Promise<{
  * AUTHENTICATION API METHODS (Milestone 3)
  * ============================================================================== */
 
+function handleNetworkError(err: unknown): Error {
+  if (err instanceof Error) {
+    if (err.name === 'AbortError') {
+      return new Error('Request timed out. The backend server took too long to respond.');
+    }
+    if (err.message.toLowerCase().includes('failed to fetch') || err.name === 'TypeError') {
+      return new Error(
+        `Unable to reach backend at ${API_CONFIG.BASE_URL}. Check that the backend server is running and CORS allows this domain.`
+      );
+    }
+    return err;
+  }
+  return new Error('An unexpected network error occurred.');
+}
+
 /**
  * Register a new user account.
  */
@@ -229,7 +244,7 @@ export async function registerApi(payload: RegisterPayload): Promise<User> {
     return await response.json();
   } catch (err) {
     clearTimeout(timeoutId);
-    throw err;
+    throw handleNetworkError(err);
   }
 }
 
@@ -268,7 +283,7 @@ export async function loginApi(payload: LoginPayload): Promise<AuthTokenResponse
     return data;
   } catch (err) {
     clearTimeout(timeoutId);
-    throw err;
+    throw handleNetworkError(err);
   }
 }
 
@@ -303,7 +318,7 @@ export async function fetchCurrentUserApi(): Promise<User> {
     return await response.json();
   } catch (err) {
     clearTimeout(timeoutId);
-    throw err;
+    throw handleNetworkError(err);
   }
 }
 
