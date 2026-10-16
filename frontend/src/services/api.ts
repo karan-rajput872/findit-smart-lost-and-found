@@ -64,8 +64,10 @@ export interface LoginPayload {
   password: string;
 }
 
+const rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').trim();
+
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  BASE_URL: rawBaseUrl.replace(/\/+$/, ''),
   TIMEOUT_MS: 20000, // 20s timeout accommodates free-tier container cold starts
   TOKEN_KEY: 'findit_jwt_access_token',
 };
