@@ -349,3 +349,42 @@ def test_upload_image_unauthenticated_rejected(client: TestClient) -> None:
     response = client.post("/api/v1/items/upload-image", files=files)
     assert response.status_code == 401
 
+
+def test_upload_image_production_requires_cloudinary(client: TestClient, auth_headers: dict) -> None:
+    """Verify that production mode rejects uploads with 503 when Cloudinary is not configured."""
+    import io
+    from unittest.mock import patch
+    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4")
+    files = {"file": ("item.png", dummy_png, "image/png")}
+
+    with patch("app.core.config.settings.ENVIRONMENT", "production"), \
+         patch("app.core.config.settings.CLOUDINARY_CLOUD_NAME", None), \
+         patch("app.core.config.settings.CLOUDINARY_API_KEY", None), \
+         patch("app.core.config.settings.CLOUDINARY_API_SECRET", None), \
+         patch("app.core.config.settings.CLOUDINARY_URL", None):
+        response = client.post("/api/v1/items/upload-image", files=files, headers=auth_headers)
+        assert response.status_code == 503
+        assert "Persistent cloud storage is not configured" in response.json()["detail"]
+
+
+def test_upload_image_cloudinary_success(client: TestClient, auth_headers: dict) -> None:
+    """Verify successful upload when Cloudinary is configured and mock uploader returns secure HTTPS URL."""
+    import io
+    from unittest.mock import patch
+    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4")
+    files = {"file": ("item.png", dummy_png, "image/png")}
+
+    mock_result = {
+        "secure_url": "https://res.cloudinary.com/findit-campus/image/upload/v12345/items/item_test.png",
+        "public_id": "findit/items/item_test",
+    }
+
+    with patch("app.core.config.settings.CLOUDINARY_CLOUD_NAME", "findit-campus"), \
+         patch("app.core.config.settings.CLOUDINARY_API_KEY", "1234567890"), \
+         patch("app.core.config.settings.CLOUDINARY_API_SECRET", "mock_secret"), \
+         patch("cloudinary.uploader.upload", return_value=mock_result):
+        response = client.post("/api/v1/items/upload-image", files=files, headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["url"] == "https://res.cloudinary.com/findit-campus/image/upload/v12345/items/item_test.png"
+        assert data["filename"] == "findit/items/item_test"

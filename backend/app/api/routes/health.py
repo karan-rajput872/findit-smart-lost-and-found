@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 from app.core.config import settings
-from app.db.session import check_db_connection
+from app.db.session import check_db_connection, engine
 from app.schemas.health import HealthResponse
 
 router = APIRouter()
@@ -18,12 +18,15 @@ def get_health() -> HealthResponse:
     """Check API and actual database connectivity."""
     db_ok, db_msg = check_db_connection()
 
+    # Determine real engine dialect from actual SQLAlchemy engine
+    active_storage = engine.dialect.name if engine is not None else settings.active_storage_mode
+
     return HealthResponse(
         status="ok" if db_ok else "degraded",
         app_name=settings.PROJECT_NAME,
         version=settings.VERSION,
         environment=settings.ENVIRONMENT,
-        storage_mode=settings.active_storage_mode,
+        storage_mode=active_storage,
         database_status="connected" if db_ok else "unavailable",
         database_detail=db_msg,
     )

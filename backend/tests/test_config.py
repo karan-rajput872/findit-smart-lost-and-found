@@ -82,3 +82,30 @@ def test_cloud_host_ssl_enforcement() -> None:
     render_db = "postgresql://dbuser:pass@dpg-sample.oregon-postgres.render.com/findit"
     s = Settings(DATABASE_URL=render_db)
     assert "sslmode=require" in s.sqlalchemy_database_uri
+
+
+def test_production_without_database_url_raises_error() -> None:
+    """Verify that ENVIRONMENT=production raises ValueError when DATABASE_URL is missing."""
+    import pytest
+    s = Settings(ENVIRONMENT="production", DATABASE_URL=None)
+    with pytest.raises(ValueError, match="DATABASE_URL environment variable must be configured when ENVIRONMENT=production"):
+        _ = s.sqlalchemy_database_uri
+
+
+def test_production_with_sqlite_database_url_raises_error() -> None:
+    """Verify that ENVIRONMENT=production raises ValueError when DATABASE_URL points to SQLite."""
+    import pytest
+    s = Settings(ENVIRONMENT="production", DATABASE_URL="sqlite:///backend/data/findit.db")
+    with pytest.raises(ValueError, match="SQLite database URI cannot be used when ENVIRONMENT=production"):
+        _ = s.sqlalchemy_database_uri
+
+
+def test_production_with_valid_postgres_url_succeeds() -> None:
+    """Verify that ENVIRONMENT=production succeeds when configured with PostgreSQL."""
+    neon_url = "postgresql://test_user:secret@ep-sample.us-east-2.aws.neon.tech/neondb"
+    s = Settings(ENVIRONMENT="production", DATABASE_URL=neon_url)
+    assert s.is_postgres is True
+    assert s.is_sqlite is False
+    assert s.active_storage_mode == "postgresql"
+    assert s.sqlalchemy_database_uri.startswith("postgresql+psycopg://")
+    assert "sslmode=require" in s.sqlalchemy_database_uri

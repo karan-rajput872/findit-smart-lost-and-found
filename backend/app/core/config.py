@@ -141,6 +141,11 @@ class Settings(BaseSettings):
 
             # If explicitly pointing to SQLite
             if url.startswith("sqlite"):
+                if self.ENVIRONMENT.lower() == "production":
+                    raise ValueError(
+                        "SQLite database URI cannot be used when ENVIRONMENT=production. "
+                        "Configure a valid PostgreSQL DATABASE_URL (e.g. Neon Cloud PostgreSQL)."
+                    )
                 return url
 
             # Normalize URI schemes from cloud providers for psycopg 3
@@ -165,6 +170,12 @@ class Settings(BaseSettings):
                 url = f"{url}{delimiter}sslmode=require"
 
             return url
+
+        if self.ENVIRONMENT.lower() == "production":
+            raise ValueError(
+                "DATABASE_URL environment variable must be configured when ENVIRONMENT=production. "
+                "Silent fallback to SQLite in production is disabled to protect against ephemeral data loss."
+            )
 
         # Safe local development default: persistent file-based SQLite
         sqlite_file = os.path.abspath(self.SQLITE_DB_PATH).replace("\\", "/")

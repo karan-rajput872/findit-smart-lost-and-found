@@ -61,12 +61,27 @@ def upload_image_to_storage(contents: bytes, ext: str, original_filename: str = 
             }
         except ImportError:
             logger.warning(
-                "Cloudinary credentials configured but 'cloudinary' package is not installed. Falling back to local storage."
+                "Cloudinary credentials configured but 'cloudinary' package is not installed."
             )
+            if settings.ENVIRONMENT.lower() == "production":
+                raise RuntimeError(
+                    "Cloudinary SDK is missing in production environment. Ephemeral local storage cannot be used."
+                )
         except Exception as e:
-            logger.error("Cloudinary upload failed: %s. Falling back to local storage.", e, exc_info=True)
+            logger.error("Cloudinary upload failed: %s", e, exc_info=True)
+            if settings.ENVIRONMENT.lower() == "production":
+                raise RuntimeError(f"Cloudinary upload failed: {e}")
+    elif settings.ENVIRONMENT.lower() == "production":
+        logger.error(
+            "Production image upload rejected: Cloudinary credentials are not configured. "
+            "Ephemeral local storage cannot be used in production."
+        )
+        raise RuntimeError(
+            "Persistent cloud storage is not configured. "
+            "Please configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in the Render dashboard."
+        )
 
-    # Local filesystem storage fallback
+    # Local filesystem storage fallback (development only)
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     dest_path = os.path.join(settings.UPLOAD_DIR, safe_filename)
     with open(dest_path, "wb") as f:

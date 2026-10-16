@@ -163,7 +163,13 @@ async def upload_item_image(
         )
 
     from app.services.storage_service import upload_image_to_storage
-    return upload_image_to_storage(contents=contents, ext=ext, original_filename=filename)
+    try:
+        return upload_image_to_storage(contents=contents, ext=ext, original_filename=filename)
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(e),
+        )
 
 
 @router.post(

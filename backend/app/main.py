@@ -29,9 +29,9 @@ async def lifespan(app: FastAPI):
                 "Ensure JWT_SECRET_KEY is securely configured via environment variables."
             )
         if not settings.is_postgres:
-            logger.warning(
-                "PRODUCTION STORAGE ALERT: Production environment is running on ephemeral SQLite storage. "
-                "Configure DATABASE_URL to use persistent Neon Cloud PostgreSQL."
+            raise RuntimeError(
+                "CRITICAL PRODUCTION CONFIGURATION ERROR: Production environment is not configured with PostgreSQL. "
+                "Configure DATABASE_URL with your verified Neon PostgreSQL connection string."
             )
     from app.db.init_db import init_db
     init_db()
@@ -104,12 +104,14 @@ def root_health() -> HealthResponse:
 )
 def root() -> Dict[str, Any]:
     """Root metadata endpoint."""
+    from app.db.session import engine
+    active_storage = engine.dialect.name if engine is not None else settings.active_storage_mode
     return {
         "app_name": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "status": "online",
         "environment": settings.ENVIRONMENT,
-        "storage_mode": settings.active_storage_mode,
+        "storage_mode": active_storage,
         "database_configured": settings.is_database_configured,
         "docs_url": "/docs",
         "health_check": f"{settings.API_V1_STR}/health",
