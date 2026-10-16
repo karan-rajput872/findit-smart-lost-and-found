@@ -29,10 +29,11 @@ def _create_configured_engine():
         # Pooled engine for Neon Cloud PostgreSQL or production instances
         return create_engine(
             uri,
-            pool_pre_ping=True,
-            pool_size=10,
-            max_overflow=20,
-            pool_recycle=300,
+            pool_pre_ping=settings.DB_POOL_PRE_PING,
+            pool_size=settings.DB_POOL_SIZE,
+            max_overflow=settings.DB_MAX_OVERFLOW,
+            pool_recycle=settings.DB_POOL_RECYCLE,
+            pool_timeout=settings.DB_POOL_TIMEOUT,
             connect_args={"connect_timeout": 10},
         )
 
@@ -40,16 +41,24 @@ def _create_configured_engine():
 # Global Engine and SessionLocal factory
 engine = _create_configured_engine()
 
+import sqlite3
+
 # Configure SQLite PRAGMA for enforcing foreign key constraints
 @event.listens_for(Engine, "connect")
 def _enforce_sqlite_foreign_keys(dbapi_connection, connection_record):
-    """Enable foreign key constraints on SQLite connections."""
-    try:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-    except Exception:
-        pass
+    """Enable foreign key constraints exclusively on SQLite connections.
+
+    Prevents PostgreSQL connections (psycopg 3) from executing SQLite-specific
+    PRAGMA commands which would cause a syntax error, abort the PostgreSQL transaction,
+    and raise InFailedSqlTransaction on subsequent queries.
+    """
+    if isinstance(dbapi_connection, sqlite3.Connection) or getattr(dbapi_connection, "__class__", type(None)).__module__.startswith("sqlite3"):
+        try:
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+        except Exception:
+            pass
 
 
 SessionLocal = sessionmaker(
@@ -68,6 +77,16 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
+def _sanitize_db_error_message(message: str) -> str:
+    """Mask sensitive credentials and connection strings from database diagnostics."""
+    if not message:
+        return ""
+    import re
+    sanitized = re.sub(r"://([^:/@]+):([^@]+)@", r"://\1:***@", str(message))
+    sanitized = re.sub(r"(password=)[^&;\s]+", r"\1***", sanitized, flags=re.IGNORECASE)
+    return sanitized
+
+
 def check_db_connection() -> Tuple[bool, str]:
     """Verify actual database connectivity by executing a lightweight verification query.
 
@@ -83,8 +102,11 @@ def check_db_connection() -> Tuple[bool, str]:
             return True, "connected"
     except OperationalError as e:
         detail = str(e.orig) if hasattr(e, "orig") and e.orig else str(e)
-        return False, f"Database connection unavailable ({detail})"
+        sanitized = _sanitize_db_error_message(detail)
+        return False, f"Database connection unavailable ({sanitized})"
     except SQLAlchemyError as e:
-        return False, f"Database error occurred: {str(e)}"
+        sanitized = _sanitize_db_error_message(str(e))
+        return False, f"Database error occurred: {sanitized}"
     except Exception as e:
-        return False, f"Unexpected database connection failure: {str(e)}"
+        sanitized = _sanitize_db_error_message(str(e))
+        return False, f"Unexpected database connection failure: {sanitized}"

@@ -7,10 +7,12 @@ services:
     plan: free
     rootDir: backend
     buildCommand: "pip install --no-cache-dir -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'"
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
       - key: ENVIRONMENT
         value: production
       - key: PROJECT_NAME
@@ -21,6 +23,10 @@ services:
         value: "/api/v1"
       - key: ENABLE_DOCS
         value: "true"
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "10"
       # Secure environment variables to configure in Render Dashboard:
       - key: BACKEND_CORS_ORIGINS
         sync: false

@@ -45,3 +45,40 @@ def test_neon_postgresql_scheme_normalization() -> None:
     assert normalized.startswith("postgresql+psycopg://")
     assert "sslmode=require" in normalized
     assert normalized.count("sslmode=require") == 1
+
+
+def test_cors_trailing_slash_normalization() -> None:
+    """Verify that trailing slashes are cleanly stripped from CORS origin URLs."""
+    s = Settings(BACKEND_CORS_ORIGINS='["https://findit.vercel.app/", "http://localhost:5173/"]')
+    assert "https://findit.vercel.app" in s.BACKEND_CORS_ORIGINS
+    assert "https://findit.vercel.app/" not in s.BACKEND_CORS_ORIGINS
+    assert "http://localhost:5173" in s.BACKEND_CORS_ORIGINS
+
+
+def test_db_pool_settings_defaults_and_override() -> None:
+    """Verify connection pool defaults and override settings."""
+    s_default = Settings()
+    assert s_default.DB_POOL_SIZE == 5
+    assert s_default.DB_MAX_OVERFLOW == 10
+    assert s_default.DB_POOL_TIMEOUT == 30
+    assert s_default.DB_POOL_RECYCLE == 300
+    assert s_default.DB_POOL_PRE_PING is True
+
+    s_custom = Settings(DB_POOL_SIZE=8, DB_MAX_OVERFLOW=12)
+    assert s_custom.DB_POOL_SIZE == 8
+    assert s_custom.DB_MAX_OVERFLOW == 12
+
+
+def test_psycopg2_driver_normalization() -> None:
+    """Verify that postgresql+psycopg2:// is automatically normalized to postgresql+psycopg://."""
+    legacy_url = "postgresql+psycopg2://test_user:pass@ep-sample.us-east-2.aws.neon.tech/db"
+    s = Settings(DATABASE_URL=legacy_url)
+    assert s.sqlalchemy_database_uri.startswith("postgresql+psycopg://")
+    assert "sslmode=require" in s.sqlalchemy_database_uri
+
+
+def test_cloud_host_ssl_enforcement() -> None:
+    """Verify that cloud database endpoints receive sslmode=require."""
+    render_db = "postgresql://dbuser:pass@dpg-sample.oregon-postgres.render.com/findit"
+    s = Settings(DATABASE_URL=render_db)
+    assert "sslmode=require" in s.sqlalchemy_database_uri

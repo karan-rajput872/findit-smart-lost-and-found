@@ -46,12 +46,12 @@ class Settings(BaseSettings):
                 try:
                     parsed = json.loads(v_str)
                     if isinstance(parsed, list):
-                        return [str(i).strip() for i in parsed if str(i).strip()]
+                        return [str(i).strip().rstrip("/") for i in parsed if str(i).strip()]
                 except Exception:
                     pass
-            return [i.strip() for i in v_str.split(",") if i.strip()]
+            return [i.strip().rstrip("/") for i in v_str.split(",") if i.strip()]
         elif isinstance(v, list):
-            return [str(i).strip() for i in v if str(i).strip()]
+            return [str(i).strip().rstrip("/") for i in v if str(i).strip()]
         return [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
@@ -98,6 +98,13 @@ class Settings(BaseSettings):
     # Explicit Database URL override (e.g. from Neon Cloud PostgreSQL or custom SQLite)
     DATABASE_URL: Optional[str] = None
 
+    # Database Connection Pool Settings (for PostgreSQL / Neon)
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 300
+    DB_POOL_PRE_PING: bool = True
+
     @property
     def is_database_configured(self) -> bool:
         """Check whether a database connection URI is configured."""
@@ -139,11 +146,21 @@ class Settings(BaseSettings):
             # Normalize URI schemes from cloud providers for psycopg 3
             if url.startswith("postgres://"):
                 url = url.replace("postgres://", "postgresql+psycopg://", 1)
+            elif url.startswith("postgresql+psycopg2://"):
+                url = url.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
             elif url.startswith("postgresql://") and not url.startswith("postgresql+psycopg://"):
                 url = url.replace("postgresql://", "postgresql+psycopg://", 1)
 
             # Ensure SSL mode is active for Neon or remote cloud PostgreSQL endpoints
-            if ("neon.tech" in url or "amazonaws.com" in url or "aws" in url) and "sslmode=" not in url:
+            is_cloud_host = (
+                "neon.tech" in url
+                or "amazonaws.com" in url
+                or "aws" in url
+                or "render.com" in url
+                or "onrender.com" in url
+                or (self.ENVIRONMENT.lower() == "production" and "localhost" not in url and "127.0.0.1" not in url)
+            )
+            if is_cloud_host and "sslmode=" not in url:
                 delimiter = "&" if "?" in url else "?"
                 url = f"{url}{delimiter}sslmode=require"
 

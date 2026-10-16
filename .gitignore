@@ -59,5 +59,7 @@ backend/data/*.db-journal
 backend/data/*.sqlite*
 backend/data/*.backup*
 *.backup*
+backend/backups/*
+!backend/backups/.gitkeep
 backend/data/uploads/*
 !backend/data/uploads/.gitkeep

@@ -28,6 +28,11 @@ async def lifespan(app: FastAPI):
                 "CRITICAL SECURITY ALERT: Production environment is running with default insecure JWT_SECRET_KEY. "
                 "Ensure JWT_SECRET_KEY is securely configured via environment variables."
             )
+        if not settings.is_postgres:
+            logger.warning(
+                "PRODUCTION STORAGE ALERT: Production environment is running on ephemeral SQLite storage. "
+                "Configure DATABASE_URL to use persistent Neon Cloud PostgreSQL."
+            )
     from app.db.init_db import init_db
     init_db()
     yield
