@@ -6,6 +6,7 @@ from app.models.item import Item, ReportType, ItemStatus
 from app.models.claim import Claim, ClaimStatus
 from app.models.notification import Notification, NotificationType
 from app.models.match import ItemMatch, MatchStatus, MatchFeedback
+from app.models.message import Message
 
 __all__ = [
     "Base",
@@ -20,4 +21,5 @@ __all__ = [
     "ItemMatch",
     "MatchStatus",
     "MatchFeedback",
+    "Message",
 ]

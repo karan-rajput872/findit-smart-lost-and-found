@@ -64,7 +64,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               {notification.title}
             </h4>
             {isUnread && (
-              <span className="w-2 h-2 rounded-full bg-findit-primary shrink-0 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-findit-primary shrink-0" />
             )}
           </div>
           <span className="text-[11px] text-findit-subtle shrink-0">

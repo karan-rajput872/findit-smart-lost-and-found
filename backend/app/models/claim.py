@@ -2,10 +2,11 @@
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 from sqlalchemy import (
     String,
     Text,
+    Boolean,
     DateTime,
     ForeignKey,
     func,
@@ -17,6 +18,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.item import Item
+    from app.models.message import Message
 
 
 class ClaimStatus(str, enum.Enum):
@@ -77,6 +79,10 @@ class Claim(Base):
     )
     handover_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Explicit mutual contact sharing consent flags
+    claimant_contact_shared: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    owner_contact_shared: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -100,6 +106,12 @@ class Claim(Base):
         "User",
         foreign_keys=[item_owner_id],
         back_populates="received_claims",
+    )
+    messages: Mapped[List["Message"]] = relationship(
+        "Message",
+        back_populates="claim",
+        cascade="all, delete-orphan",
+        order_by="Message.created_at",
     )
 
     def __repr__(self) -> str:

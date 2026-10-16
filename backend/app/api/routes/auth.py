@@ -1,13 +1,14 @@
 """Authentication and user session routes."""
 
 from typing import Dict
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.schemas.user import (
     UserRegister,
     UserLogin,
     UserResponse,
     TokenResponse,
+    UserContactUpdate,
 )
 from app.services.auth_service import auth_service
 from app.services.user_repository import (
@@ -59,6 +60,33 @@ def get_current_profile(
 ) -> UserResponse:
     """Return currently authenticated user."""
     return current_user
+
+
+@router.patch(
+    "/profile/contact",
+    response_model=UserResponse,
+    summary="Update user contact details and coordination preferences",
+    description="Update mobile number, WhatsApp number, and preferred return contact method.",
+)
+def update_contact_profile(
+    contact_in: UserContactUpdate,
+    current_user: UserResponse = Depends(get_current_user),
+    user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
+) -> UserResponse:
+    """Update contact profile information and return preferences."""
+    user = user_repo.update_contact(
+        user_id=current_user.id,
+        phone_number=contact_in.phoneNumber,
+        whatsapp_number=contact_in.whatsappNumber,
+        whatsapp_same_as_phone=contact_in.whatsappSameAsPhone,
+        preferred_contact_method=contact_in.preferredContactMethod,
+    )
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User account not found.",
+        )
+    return user.to_response()
 
 
 @router.post(

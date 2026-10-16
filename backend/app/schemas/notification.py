@@ -7,10 +7,14 @@ NotificationCategoryType = Literal[
     "claim_submitted",
     "claim_approved",
     "claim_rejected",
+    "claim_cancelled",
     "claim_under_review",
     "handover_arranged",
+    "return_in_progress",
     "item_returned",
     "match_found",
+    "new_message",
+    "contact_shared",
     "system",
 ]
 

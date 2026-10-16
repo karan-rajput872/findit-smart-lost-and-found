@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { UploadCloud, Image as ImageIcon, X, AlertCircle } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { uploadItemImageApi } from '../../services/api';
 
 interface UploadZoneProps {
   previewUrl: string;
@@ -16,6 +17,8 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -24,26 +27,36 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
     }
   };
 
-  const processFile = (file: File) => {
+  const processFile = async (file: File) => {
+    setUploadError(null);
     if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file (PNG, JPG, WEBP).');
+      setUploadError('Please select a valid image file (PNG, JPG, WEBP, GIF).');
       return;
     }
 
     // 5MB file size restriction
     const MAX_SIZE_BYTES = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE_BYTES) {
-      alert(`Image file size must be under 5MB. Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB.`);
+      setUploadError(`Image file size must be under 5MB. Selected file is ${(file.size / (1024 * 1024)).toFixed(1)}MB.`);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        onImageSelected(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    setIsUploading(true);
+    try {
+      const res = await uploadItemImageApi(file);
+      onImageSelected(res.url);
+    } catch {
+      // Fallback to local DataURL preview if server upload fails
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          onImageSelected(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -97,7 +110,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 
           <div className="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-[11px] text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Image Ready (Local Preview)
+            Photograph Ready (Persistent Storage)
           </div>
         </div>
       ) : (
@@ -105,26 +118,36 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => !isUploading && fileInputRef.current?.click()}
           className={`flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all text-center
             ${
               isDragging
                 ? 'border-findit-primary bg-findit-primary/10 scale-[0.99]'
-                : error
+                : (uploadError || error)
                 ? 'border-findit-danger/60 bg-findit-card/60'
                 : 'border-findit-border hover:border-findit-primary/60 bg-findit-card/40 hover:bg-findit-card/70'
             }`}
         >
-          <div className="w-12 h-12 rounded-xl bg-findit-bg flex items-center justify-center text-findit-primary mb-3 border border-findit-border">
-            {isDragging ? <ImageIcon className="w-6 h-6 animate-bounce" /> : <UploadCloud className="w-6 h-6" />}
-          </div>
+          {isUploading ? (
+            <div className="flex flex-col items-center justify-center py-2">
+              <RefreshCw className="w-8 h-8 animate-spin text-findit-primary mb-2" />
+              <p className="text-sm font-semibold text-findit-text">Uploading photograph...</p>
+              <p className="text-xs text-findit-muted">Storing persistently in campus database</p>
+            </div>
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-xl bg-findit-bg flex items-center justify-center text-findit-primary mb-3 border border-findit-border">
+                {isDragging ? <ImageIcon className="w-6 h-6 animate-bounce" /> : <UploadCloud className="w-6 h-6" />}
+              </div>
 
-          <p className="text-sm font-semibold text-findit-text mb-1">
-            Click to upload photograph <span className="font-normal text-findit-muted">or drag & drop</span>
-          </p>
-          <p className="text-xs text-findit-subtle max-w-xs">
-            PNG, JPG, or WEBP. Kept safely in local browser memory (no server upload).
-          </p>
+              <p className="text-sm font-semibold text-findit-text mb-1">
+                Click to upload photograph <span className="font-normal text-findit-muted">or drag & drop</span>
+              </p>
+              <p className="text-xs text-findit-subtle max-w-xs">
+                PNG, JPG, WEBP, or GIF (max 5MB). Persistently stored for campus verification.
+              </p>
+            </>
+          )}
         </div>
       )}
 
@@ -136,10 +159,10 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
         className="hidden"
       />
 
-      {error && (
+      {(uploadError || error) && (
         <p className="text-xs text-findit-danger flex items-center gap-1 font-medium">
           <AlertCircle className="w-3.5 h-3.5" />
-          {error}
+          {uploadError || error}
         </p>
       )}
     </div>

@@ -11,7 +11,58 @@
     background-color: #0B0D12;
     color: #F5F6FA;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
+}
+
+/* 1. Prevent tap highlight blinking on touchscreens, laptops, and mobile */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 2. Completely eliminate the text cursor / caret blinker (|) between words */
+* {
+  caret-color: transparent !important;
+}
+
+/* 3. Keep cursor blinker active ONLY inside actual editable text inputs & textareas */
+input,
+textarea,
+[contenteditable="true"] {
+  caret-color: #8B7CFF !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* 4. Eliminate click/tap outline blinkers while preserving keyboard tab navigation */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button:focus,
+a:focus,
+[role="button"]:focus,
+div:focus,
+p:focus,
+span:focus,
+h1:focus,
+h2:focus,
+h3:focus,
+h4:focus {
+  outline: none !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid rgba(139, 124, 255, 0.6) !important;
+  outline-offset: 2px;
 }
 
 /* Custom sleek scrollbar */

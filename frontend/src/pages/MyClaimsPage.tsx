@@ -16,6 +16,7 @@ import {
 import { PageHeader } from '../components/common/PageHeader';
 import { ConfirmationDialog } from '../components/common/ConfirmationDialog';
 import { EmptyState } from '../components/common/EmptyState';
+import { ClaimCoordinationCard } from '../components/ClaimCoordinationCard';
 import { useApp } from '../context/AppContext';
 import { formatDate } from '../utils/formatters';
 import type { Claim, ClaimStatus } from '../types';
@@ -191,70 +192,82 @@ export const MyClaimsPage: React.FC = () => {
           {filteredClaims.map((claim) => (
             <div
               key={claim.id}
-              className="p-5 rounded-2xl bg-findit-card border border-findit-border hover:border-findit-primary/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="p-5 rounded-2xl bg-findit-card border border-findit-border hover:border-findit-primary/40 transition-all flex flex-col gap-3"
             >
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-sm font-bold text-white truncate">
-                    {claim.itemTitle || `Claim for Item #${claim.itemId}`}
-                  </h3>
-                  {getStatusBadge(claim.status)}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-bold text-white truncate">
+                      {claim.itemTitle || `Claim for Item #${claim.itemId}`}
+                    </h3>
+                    {getStatusBadge(claim.status)}
+                  </div>
+
+                  <p className="text-xs text-findit-muted line-clamp-2">
+                    <span className="font-semibold text-findit-text">Your explanation:</span> {claim.description}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-4 text-[11px] text-findit-subtle pt-1">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Submitted: {(claim.createdAt || claim.dateSubmitted) ? formatDate(claim.createdAt || claim.dateSubmitted!) : 'Recently'}
+                    </span>
+                    {claim.reviewNotes && (
+                      <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        Review note attached
+                      </span>
+                    )}
+                    {claim.handoverStatus && (
+                      <span className="flex items-center gap-1 text-purple-400 font-medium">
+                        <PackageCheck className="w-3.5 h-3.5" />
+                        {claim.handoverStatus.replace('_', ' ')}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <p className="text-xs text-findit-muted line-clamp-2">
-                  <span className="font-semibold text-findit-text">Your explanation:</span> {claim.description}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-4 text-[11px] text-findit-subtle pt-1">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    Submitted: {(claim.createdAt || claim.dateSubmitted) ? formatDate(claim.createdAt || claim.dateSubmitted!) : 'Recently'}
-                  </span>
-                  {claim.reviewNotes && (
-                    <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      Review note attached
-                    </span>
-                  )}
-                  {claim.handoverStatus && (
-                    <span className="flex items-center gap-1 text-purple-400 font-medium">
-                      <PackageCheck className="w-3.5 h-3.5" />
-                      {claim.handoverStatus.replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setSelectedClaim(claim)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-findit-primary hover:bg-findit-primary-hover transition-all flex items-center gap-1.5 shadow-sm"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>View Details</span>
-                </button>
-
-                <Link
-                  to={`/dashboard/items/${claim.itemId}`}
-                  className="p-2 rounded-xl text-findit-muted hover:text-white bg-findit-bg border border-findit-border hover:border-findit-border-light transition-colors"
-                  title="View Item Listing"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </Link>
-
-                {['pending', 'under_review'].includes(claim.status.toLowerCase()) && (
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                   <button
                     type="button"
-                    onClick={() => setClaimToCancel(claim)}
-                    className="p-2 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-colors"
-                    title="Cancel Claim"
+                    onClick={() => setSelectedClaim(claim)}
+                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-findit-primary hover:bg-findit-primary-hover transition-all flex items-center gap-1.5 shadow-sm"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>View Details</span>
                   </button>
-                )}
+
+                  <Link
+                    to={`/dashboard/items/${claim.itemId}`}
+                    className="p-2 rounded-xl text-findit-muted hover:text-white bg-findit-bg border border-findit-border hover:border-findit-border-light transition-colors"
+                    title="View Item Listing"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </Link>
+
+                  {['pending', 'under_review'].includes(claim.status.toLowerCase()) && (
+                    <button
+                      type="button"
+                      onClick={() => setClaimToCancel(claim)}
+                      className="p-2 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-colors"
+                      title="Cancel Claim"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Direct Return Coordination & Contact Widget */}
+              {['approved', 'completed'].includes(claim.status.toLowerCase()) && (
+                <div className="pt-2 border-t border-findit-border/70">
+                  <ClaimCoordinationCard
+                    claim={claim}
+                    onStatusChange={fetchMyClaims}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

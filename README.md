@@ -2,7 +2,7 @@
 
 > **Platform Tagline:** *"Don't lose hope. Find what matters."*  
 > **Status:** **Milestone 10 Completed — Production Ready & Portfolio Launch**  
-> **Verification:** **83 Automated Pytest Tests Passing (0 Failures)** | **0 TypeScript Compilation Errors** | **Dual-Database: SQLite & PostgreSQL 16 Compatible**
+> **Verification:** **95 Automated Pytest Tests Passing (0 Failures)** | **0 TypeScript Compilation Errors** | **Dual-Database: SQLite & PostgreSQL 16 Compatible** | **Persistent Multipart Image Storage**
 
 ---
 
@@ -232,7 +232,7 @@ FindIt features a dual-database design:
 cd backend
 .\.venv\Scripts\python.exe -m pytest -v
 ```
-**Status: 83 tests passing (0 failures)** across authentication, items, claims, notifications, persistence, and AI matching.
+**Status: 95 tests passing (0 failures)** across authentication, items, claims, notifications, persistence, image upload, and AI matching.
 
 ### Run Frontend Production Build & Type-Check
 ```powershell
@@ -262,13 +262,53 @@ For complete VPS setup, PaaS evaluation (Render, Railway, Fly.io, Neon), and dat
 
 ---
 
-## 15. Future Improvements
+## 15. Troubleshooting & FAQ
+
+### 1. Port 8000 or Port 5173 Already in Use
+If starting the server reports `Port 8000 is already in use` or `Port 5173 is already in use`:
+- Check running processes holding the port:
+  ```powershell
+  Get-NetTCPConnection -LocalPort 8000, 5173 -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess
+  ```
+- Terminate the occupant or let `start-findit.ps1` detect the existing healthy instance automatically.
+
+### 2. Frontend Not Connecting to Backend
+- Confirm backend health is returning HTTP 200:
+  ```powershell
+  Invoke-RestMethod -Uri "http://127.0.0.1:8000/health"
+  ```
+- Ensure `VITE_API_BASE_URL` in `frontend/.env` points to `http://127.0.0.1:8000/api/v1`.
+- Verify CORS origins in `backend/app/core/config.py` include `http://localhost:5173` and `http://127.0.0.1:5173`.
+
+### 3. Database Persistence & Storage
+- SQLite default file is located at `backend/data/findit.db`.
+- SQLite database tables and seed records persist across server reboots.
+- If migrating to PostgreSQL, define `DATABASE_URL` in `backend/.env` and execute `alembic upgrade head`.
+
+### 4. Login Failures & Password Verification
+- Passwords are verified against both modern **Argon2id** and legacy **bcrypt** hashes using `pwdlib`.
+- Transparent hash upgrading ensures legacy records are migrated to Argon2id upon successful sign-in.
+- Campus identifiers accept full email (`alex.morgan@campus.edu`), prefix username (`alex.morgan`), or full name (`Alex Morgan`).
+
+### 5. Image Upload & File Validation
+- Uploaded item photographs are validated for MIME type (`image/png`, `image/jpeg`, `image/webp`, `image/gif`) and file extension.
+- File size is capped at 5 MB (`MAX_UPLOAD_SIZE_BYTES`).
+- Files are saved with collision-safe filenames in `backend/data/uploads` and served statically via `/uploads/<filename>`.
+
+### 6. AI Matching Service
+- Match recommendations use a hybrid model combining semantic similarity, category parity, campus proximity, and temporal decay.
+- If heavy ML embedding libraries (`sentence-transformers`) are unavailable in an offline environment, the system automatically falls back to an internal TF-IDF cosine similarity engine without throwing errors.
+
+---
+
+## 16. Future Improvements
 
 1. **Native Mobile App:** Build cross-platform React Native client for iOS and Android with push notifications.
 2. **Computer Vision Matching:** Extend the local matching pipeline to compute image feature embeddings (e.g. MobileNet / CLIP) for visual item comparison.
 3. **QR Code Handover Badges:** Generate one-time cryptographic QR codes for claimants to present at campus desks for instant physical scan verification.
 4. **Campus SSO / OAuth2 Integration:** Direct integration with university Identity Providers (SAML / Shibboleth / Google Workspace).
 5. **Interactive Campus Map:** Leaflet/Mapbox integration visualizing lost/found item hotspots across campus facilities.
+
 
 ---
 

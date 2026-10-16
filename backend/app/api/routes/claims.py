@@ -1,6 +1,6 @@
 """API endpoints for claim management and item return coordination."""
 
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import get_current_user
@@ -12,10 +12,22 @@ from app.schemas.claim import (
     ClaimComplete,
     ClaimResponse,
     ClaimListResponse,
+    ClaimContactConsent,
+    ContactInfoResponse,
+)
+from app.schemas.message import (
+    MessageCreate,
+    MessageResponse,
+    MessageListResponse,
+    ConversationListResponse,
 )
 from app.services.claim_repository import (
     SqlAlchemyClaimRepository,
     get_claim_repository,
+)
+from app.services.message_repository import (
+    SqlAlchemyMessageRepository,
+    get_message_repository,
 )
 
 router = APIRouter()
@@ -84,6 +96,20 @@ def list_received_claims(
         limit=limit,
     )
     return ClaimListResponse(claims=claims, total=total)
+
+
+@router.get(
+    "/conversations/active",
+    response_model=ConversationListResponse,
+    summary="List active coordination conversations for current user",
+)
+def list_active_conversations(
+    current_user: UserResponse = Depends(get_current_user),
+    message_repo: SqlAlchemyMessageRepository = Depends(get_message_repository),
+) -> ConversationListResponse:
+    """Retrieve all conversations for approved or completed claims with unread counts."""
+    convs = message_repo.list_active_conversations(user_id=current_user.id)
+    return ConversationListResponse(conversations=convs, total=len(convs))
 
 
 @router.get(
@@ -192,3 +218,73 @@ def cancel_claim(
         claimant_id=current_user.id,
         is_admin=is_admin,
     )
+
+
+@router.get(
+    "/{claim_id}/contact",
+    response_model=ContactInfoResponse,
+    summary="Get counterpart contact details under mutual consent",
+    description="Returns phone and WhatsApp contact details only if claim is approved and BOTH parties have given explicit consent.",
+)
+def get_claim_contact(
+    claim_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    claim_repo: SqlAlchemyClaimRepository = Depends(get_claim_repository),
+) -> ContactInfoResponse:
+    """Retrieve counterpart contact details strictly under mutual consent."""
+    return claim_repo.get_contact_info(claim_id=claim_id, user_id=current_user.id)
+
+
+@router.post(
+    "/{claim_id}/contact-consent",
+    response_model=ClaimResponse,
+    summary="Grant or revoke contact sharing consent for this approved claim",
+)
+def set_contact_consent(
+    claim_id: str,
+    consent_in: ClaimContactConsent,
+    current_user: UserResponse = Depends(get_current_user),
+    claim_repo: SqlAlchemyClaimRepository = Depends(get_claim_repository),
+) -> ClaimResponse:
+    """Toggle contact sharing consent for the authenticated user on an approved claim."""
+    return claim_repo.set_contact_consent(
+        claim_id=claim_id,
+        user_id=current_user.id,
+        consent=consent_in.consent,
+    )
+
+
+@router.get(
+    "/{claim_id}/messages",
+    response_model=MessageListResponse,
+    summary="Get conversation message history for an approved claim",
+)
+def get_claim_messages(
+    claim_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    message_repo: SqlAlchemyMessageRepository = Depends(get_message_repository),
+) -> MessageListResponse:
+    """Retrieve all messages for an approved claim and mark unread incoming messages as read."""
+    messages = message_repo.get_claim_messages(claim_id=claim_id, user_id=current_user.id)
+    return MessageListResponse(messages=messages, total=len(messages))
+
+
+@router.post(
+    "/{claim_id}/messages",
+    response_model=MessageResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Send a message within an approved claim conversation",
+)
+def send_claim_message(
+    claim_id: str,
+    message_in: MessageCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    message_repo: SqlAlchemyMessageRepository = Depends(get_message_repository),
+) -> MessageResponse:
+    """Post a new message to the counterpart on an approved claim."""
+    return message_repo.send_message(
+        claim_id=claim_id,
+        sender_id=current_user.id,
+        message_in=message_in,
+    )
+

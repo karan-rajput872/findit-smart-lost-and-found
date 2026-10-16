@@ -16,6 +16,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { ConfirmationDialog } from '../components/common/ConfirmationDialog';
 import { EmptyState } from '../components/common/EmptyState';
+import { ItemImage } from '../components/common/ItemImage';
 import { useApp } from '../context/AppContext';
 import type { Item, ItemStatus, ItemType } from '../types';
 import { formatDate } from '../utils/formatters';
@@ -256,9 +257,11 @@ export const MyReportsPage: React.FC = () => {
             >
               {/* Item Thumbnail & Basic Info */}
               <div className="flex items-start gap-4 flex-1">
-                <img
+                <ItemImage
                   src={item.imageUrl}
                   alt={item.title}
+                  category={item.category}
+                  itemType={item.type}
                   className="w-20 h-20 rounded-xl object-cover border border-findit-border shrink-0"
                 />
 

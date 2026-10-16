@@ -1,7 +1,10 @@
 """Item management API endpoints."""
 
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+import os
+import uuid
+from datetime import datetime
+from typing import Optional, Dict
+from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
 
 from app.core.config import settings
 from app.api.deps import get_current_user, get_optional_current_user
@@ -125,6 +128,42 @@ def get_item(
             detail=f"Item with ID '{item_id}' not found.",
         )
     return item
+
+
+@router.post(
+    "/upload-image",
+    summary="Upload item photograph",
+    description="Upload a photograph for a lost or found item. Validates image type and restricts size.",
+)
+async def upload_item_image(
+    file: UploadFile = File(...),
+    current_user: UserResponse = Depends(get_current_user),
+) -> Dict[str, str]:
+    """Upload and persistently store an item photograph."""
+    content_type = (file.content_type or "").lower()
+    if content_type not in settings.ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid file type '{file.content_type}'. Allowed types: PNG, JPEG, WEBP, GIF.",
+        )
+
+    filename = file.filename or "image.png"
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in [".jpg", ".jpeg", ".png", ".webp", ".gif"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file extension. Allowed extensions: .jpg, .jpeg, .png, .webp, .gif",
+        )
+
+    contents = await file.read()
+    if len(contents) > settings.MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File exceeds maximum allowed size of {settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)}MB.",
+        )
+
+    from app.services.storage_service import upload_image_to_storage
+    return upload_image_to_storage(contents=contents, ext=ext, original_filename=filename)
 
 
 @router.post(

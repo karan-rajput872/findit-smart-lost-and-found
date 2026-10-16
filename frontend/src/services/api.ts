@@ -4,7 +4,18 @@
  * Centralized HTTP client, JWT authentication, and diagnostics for FastAPI Backend communication.
  */
 
-import type { Item, FilterOptions, User, ItemStats, Claim, Notification, PotentialMatch } from '../types';
+import type {
+  Item,
+  FilterOptions,
+  User,
+  ItemStats,
+  Claim,
+  Notification,
+  PotentialMatch,
+  ContactInfo,
+  Message,
+  ConversationSummary,
+} from '../types';
 
 export interface BackendHealthResponse {
   status: string;
@@ -55,9 +66,36 @@ export interface LoginPayload {
 
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
-  TIMEOUT_MS: 5000,
+  TIMEOUT_MS: 20000, // 20s timeout accommodates free-tier container cold starts
   TOKEN_KEY: 'findit_jwt_access_token',
 };
+
+/**
+ * Normalizes an item image URL so relative local uploads (/uploads/...)
+ * automatically resolve to the production backend origin when hosted on different domains.
+ */
+export function resolveItemImageUrl(src?: string | null): string | undefined {
+  if (!src || typeof src !== 'string') return undefined;
+  const trimmed = src.trim();
+  if (!trimmed) return undefined;
+
+  // If already absolute HTTP/HTTPS or data URI, return as-is
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+    return trimmed;
+  }
+
+  // If relative path like /uploads/item_...png, prepend backend origin
+  if (trimmed.startsWith('/')) {
+    try {
+      const backendOrigin = new URL(API_CONFIG.BASE_URL).origin;
+      return `${backendOrigin}${trimmed}`;
+    } catch {
+      return trimmed;
+    }
+  }
+
+  return trimmed;
+}
 
 /**
  * Access token persistence helpers (stored in browser localStorage).
@@ -433,6 +471,45 @@ export async function fetchItemByIdApi(id: string): Promise<Item> {
 }
 
 /**
+ * Upload an item photograph to persistent backend storage.
+ */
+export async function uploadItemImageApi(file: File): Promise<{ url: string; filename: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = getStoredToken();
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_CONFIG.BASE_URL}/items/upload-image`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errBody = await response.json().catch(() => ({}));
+    let msg = errBody.detail || `Image upload failed (HTTP ${response.status})`;
+    if (Array.isArray(errBody.detail)) {
+      msg = errBody.detail.map((d: { msg?: string }) => d.msg).join(', ');
+    }
+    throw new Error(msg);
+  }
+
+  const data = await response.json();
+  const backendOrigin = new URL(API_CONFIG.BASE_URL).origin;
+  const fullUrl = data.url.startsWith('/') ? `${backendOrigin}${data.url}` : data.url;
+  return {
+    url: fullUrl,
+    filename: data.filename,
+  };
+}
+
+/**
  * Submit a new item to the backend.
  */
 export async function createItemApi(
@@ -731,6 +808,127 @@ export async function cancelClaimApi(claimId: string): Promise<Claim> {
   }
 
   return await response.json();
+}
+
+// =============================================================================
+// Contact Coordination & Internal Messaging System
+// =============================================================================
+
+export interface UpdateContactPayload {
+  phoneNumber?: string;
+  whatsappNumber?: string;
+  whatsappSameAsPhone: boolean;
+  preferredContactMethod: 'findit_chat' | 'whatsapp' | 'phone_call';
+}
+
+export async function updateContactProfileApi(payload: UpdateContactPayload): Promise<User> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/auth/profile/contact`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(true),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken();
+      throw new Error('Session expired. Please log in again.');
+    }
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update contact profile.');
+  }
+
+  return await response.json();
+}
+
+export async function fetchClaimContactApi(claimId: string): Promise<ContactInfo> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/claims/${claimId}/contact`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken();
+      throw new Error('Session expired.');
+    }
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to retrieve contact details.');
+  }
+
+  return await response.json();
+}
+
+export async function setContactConsentApi(claimId: string, consent: boolean): Promise<Claim> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/claims/${claimId}/contact-consent`, {
+    method: 'POST',
+    headers: getAuthHeaders(true),
+    body: JSON.stringify({ consent }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken();
+      throw new Error('Session expired.');
+    }
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update contact consent.');
+  }
+
+  return await response.json();
+}
+
+export async function fetchClaimMessagesApi(claimId: string): Promise<Message[]> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/claims/${claimId}/messages`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken();
+      throw new Error('Session expired.');
+    }
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to retrieve messages.');
+  }
+
+  const data = await response.json();
+  return data.messages || [];
+}
+
+export async function sendClaimMessageApi(claimId: string, content: string): Promise<Message> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/claims/${claimId}/messages`, {
+    method: 'POST',
+    headers: getAuthHeaders(true),
+    body: JSON.stringify({ content }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken();
+      throw new Error('Session expired.');
+    }
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to send message.');
+  }
+
+  return await response.json();
+}
+
+export async function fetchActiveConversationsApi(): Promise<ConversationSummary[]> {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/claims/conversations/active`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken();
+      throw new Error('Session expired.');
+    }
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to fetch conversations.');
+  }
+
+  const data = await response.json();
+  return data.conversations || [];
 }
 
 // =============================================================================

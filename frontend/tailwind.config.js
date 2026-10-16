@@ -11,6 +11,7 @@ export default {
         findit: {
           bg: '#0B0D12',
           sidebar: '#11151D',
+          surface: '#121620',
           card: '#171C27',
           'card-hover': '#1F2636',
           border: '#242C3F',

@@ -200,6 +200,40 @@ def seed_database_if_empty(db: Session) -> None:
         match_repo.generate_all_matches()
 
 
+def run_safe_schema_migrations(engine_instance) -> None:
+    """Safely apply non-destructive schema migrations (e.g. new columns) on SQLite tables."""
+    if not settings.is_sqlite:
+        return
+
+    try:
+        with engine_instance.connect() as conn:
+            # Check users table columns
+            user_cols_res = conn.exec_driver_sql("PRAGMA table_info(users)").fetchall()
+            user_cols = [row[1] for row in user_cols_res] if user_cols_res else []
+            if user_cols:
+                if "phone_number" not in user_cols:
+                    conn.exec_driver_sql("ALTER TABLE users ADD COLUMN phone_number VARCHAR(30)")
+                if "whatsapp_number" not in user_cols:
+                    conn.exec_driver_sql("ALTER TABLE users ADD COLUMN whatsapp_number VARCHAR(30)")
+                if "whatsapp_same_as_phone" not in user_cols:
+                    conn.exec_driver_sql("ALTER TABLE users ADD COLUMN whatsapp_same_as_phone BOOLEAN DEFAULT 1")
+                if "preferred_contact_method" not in user_cols:
+                    conn.exec_driver_sql("ALTER TABLE users ADD COLUMN preferred_contact_method VARCHAR(30) DEFAULT 'findit_chat'")
+
+            # Check claims table columns
+            claim_cols_res = conn.exec_driver_sql("PRAGMA table_info(claims)").fetchall()
+            claim_cols = [row[1] for row in claim_cols_res] if claim_cols_res else []
+            if claim_cols:
+                if "claimant_contact_shared" not in claim_cols:
+                    conn.exec_driver_sql("ALTER TABLE claims ADD COLUMN claimant_contact_shared BOOLEAN DEFAULT 0")
+                if "owner_contact_shared" not in claim_cols:
+                    conn.exec_driver_sql("ALTER TABLE claims ADD COLUMN owner_contact_shared BOOLEAN DEFAULT 0")
+
+            conn.commit()
+    except Exception as e:
+        logger.warning("Non-fatal schema migration note: %s", e)
+
+
 def init_db() -> bool:
     """Initialize database connection, ensure schema exists, and seed if empty."""
     is_connected, msg = check_db_connection()
@@ -208,8 +242,11 @@ def init_db() -> bool:
         return False
 
     try:
-        # Create tables if not already present
+        # Create all tables (including newly added Message table)
         Base.metadata.create_all(bind=engine)
+
+        # Run safe migrations for existing tables
+        run_safe_schema_migrations(engine)
 
         # Seed initial records if table is fresh
         db = SessionLocal()

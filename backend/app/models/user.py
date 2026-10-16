@@ -27,6 +27,12 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20), default="student", nullable=False)  # student, staff, admin
     avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
+    # Contact Information & Privacy Preferences
+    phone_number: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    whatsapp_number: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    whatsapp_same_as_phone: Mapped[bool] = mapped_column(default=True, nullable=False)
+    preferred_contact_method: Mapped[str] = mapped_column(String(30), default="findit_chat", nullable=False)  # findit_chat, whatsapp, phone_call
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -79,6 +85,10 @@ class User(Base):
             campus=self.campus,
             role=self.role,  # type: ignore[arg-type]
             avatarUrl=self.avatar_url,
+            phoneNumber=self.phone_number,
+            whatsappNumber=self.whatsapp_number,
+            whatsappSameAsPhone=bool(self.whatsapp_same_as_phone),
+            preferredContactMethod=self.preferred_contact_method or "findit_chat",
             createdAt=created_iso,
         )
 

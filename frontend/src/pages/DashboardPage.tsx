@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileQuestion,
@@ -11,13 +11,18 @@ import {
   MapPin,
   ListOrdered,
   Clock,
+  Smartphone,
+  Check,
 } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ItemImage } from '../components/common/ItemImage';
+import { ContactSettingsModal } from '../components/ContactSettingsModal';
 import { useApp } from '../context/AppContext';
 
 export const DashboardPage: React.FC = () => {
   const { user, items, myItems, stats, potentialMatches, notifications, isLoadingItems } = useApp();
+  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   // Prefer backend live statistics, fall back to loaded items
   const lostCount = stats ? stats.lost_items : items.filter((i) => i.type === 'lost').length;
@@ -75,6 +80,46 @@ export const DashboardPage: React.FC = () => {
             <span>My Listings</span>
           </Link>
         </div>
+      </div>
+
+      {/* Contact & Return Coordination Quick Card */}
+      <div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 px-5 rounded-2xl border border-[#263147] shadow-sm"
+        style={{ backgroundColor: '#131824' }}
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <Smartphone className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-bold text-white">
+                Item Return Contact Preferences
+              </h3>
+              {user.phoneNumber ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/25">
+                  <Check className="w-2.5 h-2.5" /> Configured
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/25">
+                  Not Configured
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {user.phoneNumber
+                ? `Phone: ${user.phoneNumber} · Preferred Method: ${user.preferredContactMethod === 'whatsapp' ? 'WhatsApp' : user.preferredContactMethod === 'phone_call' ? 'Phone Call' : 'FindIt Chat'}`
+                : 'Add your Mobile or WhatsApp number for direct handover coordination when claims are approved.'}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setContactModalOpen(true)}
+          className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all shrink-0 self-start sm:self-auto shadow-sm shadow-indigo-600/30"
+        >
+          {user.phoneNumber ? 'Manage Contact Settings' : 'Set Up Contact Number'}
+        </button>
       </div>
 
       {/* Summary Stat Cards from live Backend */}
@@ -143,10 +188,12 @@ export const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
             {/* Lost Card */}
             <div className="p-3.5 rounded-xl bg-findit-bg/80 border border-findit-border flex items-center gap-3">
-              <img
+              <ItemImage
                 src={topMatch.lostItem.imageUrl}
                 alt={topMatch.lostItem.title}
-                className="w-14 h-14 rounded-lg object-cover border border-findit-border"
+                category={topMatch.lostItem.category}
+                itemType="lost"
+                className="w-14 h-14 rounded-lg object-cover border border-findit-border shrink-0"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
@@ -160,10 +207,12 @@ export const DashboardPage: React.FC = () => {
 
             {/* Found Card */}
             <div className="p-3.5 rounded-xl bg-findit-bg/80 border border-findit-border flex items-center gap-3">
-              <img
+              <ItemImage
                 src={topMatch.foundItem.imageUrl}
                 alt={topMatch.foundItem.title}
-                className="w-14 h-14 rounded-lg object-cover border border-findit-border"
+                category={topMatch.foundItem.category}
+                itemType="found"
+                className="w-14 h-14 rounded-lg object-cover border border-findit-border shrink-0"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
@@ -226,14 +275,12 @@ export const DashboardPage: React.FC = () => {
                   className="p-3.5 rounded-2xl bg-findit-card border border-findit-border card-hover flex flex-col justify-between space-y-3"
                 >
                   <div className="flex items-start gap-3">
-                    <img
+                    <ItemImage
                       src={item.imageUrl}
                       alt={item.title}
+                      category={item.category}
+                      itemType={item.type}
                       className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=800&q=80';
-                      }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-1">
@@ -295,6 +342,11 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ContactSettingsModal
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
     </div>
   );
 };

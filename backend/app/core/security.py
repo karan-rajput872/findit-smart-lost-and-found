@@ -1,22 +1,42 @@
 """Authentication, password hashing, and JWT security utilities."""
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
+import logging
 import bcrypt
 import jwt
 
+try:
+    from pwdlib import PasswordHash
+    from pwdlib.hashers.argon2 import Argon2Hasher
+    from pwdlib.hashers.bcrypt import BcryptHasher
+
+    _password_hash = PasswordHash((Argon2Hasher(), BcryptHasher()))
+except ImportError:
+    _password_hash = None
+
+logger = logging.getLogger("findit.security")
 from app.core.config import settings
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a plaintext password using bcrypt with a random salt."""
+    """Hash a plaintext password using Argon2id (or bcrypt fallback)."""
+    if _password_hash is not None:
+        return _password_hash.hash(password)
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-    return hashed.decode("utf-8")
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify that a plaintext password matches an existing bcrypt hash."""
+    """Verify that a plaintext password matches an existing Argon2id or legacy bcrypt hash."""
+    if not hashed_password or not plain_password:
+        return False
+    if _password_hash is not None:
+        try:
+            return _password_hash.verify(plain_password, hashed_password)
+        except Exception:
+            pass
+    # Fallback direct bcrypt verification
     try:
         return bcrypt.checkpw(
             plain_password.encode("utf-8"),
@@ -24,6 +44,21 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         )
     except Exception:
         return False
+
+
+def verify_and_update_password(plain_password: str, hashed_password: str) -> Tuple[bool, Optional[str]]:
+    """Verify password and return updated Argon2 hash if stored hash is legacy format."""
+    if not hashed_password or not plain_password:
+        return False, None
+    if _password_hash is not None:
+        try:
+            valid, updated_hash = _password_hash.verify_and_update(plain_password, hashed_password)
+            return bool(valid), updated_hash
+        except Exception:
+            pass
+    # Fallback to verify_password
+    valid = verify_password(plain_password, hashed_password)
+    return valid, None
 
 
 def create_access_token(

@@ -23,6 +23,9 @@ class UserRepositoryInterface(Protocol):
     def get_by_email(self, email: str) -> Optional[User]:
         ...
 
+    def get_by_identifier(self, identifier: str) -> Optional[User]:
+        ...
+
     def create(self, user_in: UserRegister, hashed_password: str) -> User:
         ...
 
@@ -44,6 +47,41 @@ class SqlAlchemyUserRepository:
         """Fetch user by normalized lowercase email."""
         return self.db.query(User).filter(func.lower(User.email) == email.strip().lower()).first()
 
+    def get_by_identifier(self, identifier: str) -> Optional[User]:
+        """Fetch user by email (case-insensitive), username prefix before '@', or full name."""
+        cleaned = identifier.strip().lower()
+        if not cleaned:
+            return None
+
+        # 1. Exact match on lowercase email
+        user = self.db.query(User).filter(func.lower(User.email) == cleaned).first()
+        if user:
+            return user
+
+        # 2. Match on username prefix before '@' (e.g. 'alex.morgan' -> 'alex.morgan@campus.edu')
+        user = self.db.query(User).filter(func.lower(User.email).like(f"{cleaned}@%")).first()
+        if user:
+            return user
+
+        # 3. Match on full_name (case-insensitive)
+        user = self.db.query(User).filter(func.lower(User.full_name) == cleaned).first()
+        if user:
+            return user
+
+        # 4. Match on first word of full name (e.g. 'Alex' -> 'Alex Morgan')
+        user = self.db.query(User).filter(func.lower(User.full_name).like(f"{cleaned} %")).first()
+        if user:
+            return user
+
+        # 5. Match on last word of full name (e.g. 'Morgan' -> 'Alex Morgan')
+        user = self.db.query(User).filter(func.lower(User.full_name).like(f"% {cleaned}")).first()
+        if user:
+            return user
+
+        # 6. Match on user.id
+        return self.db.query(User).filter(User.id == identifier.strip()).first()
+
+
     def create(self, user_in: UserRegister, hashed_password: str) -> User:
         """Persist a new user account."""
         now_ts = int(datetime.utcnow().timestamp())
@@ -63,6 +101,26 @@ class SqlAlchemyUserRepository:
         self.db.commit()
         self.db.refresh(db_user)
         return db_user
+
+    def update_contact(
+        self,
+        user_id: str,
+        phone_number: Optional[str],
+        whatsapp_number: Optional[str],
+        whatsapp_same_as_phone: bool,
+        preferred_contact_method: str,
+    ) -> Optional[User]:
+        """Update user contact numbers and preferred contact coordination channel."""
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+        user.phone_number = phone_number
+        user.whatsapp_number = whatsapp_number
+        user.whatsapp_same_as_phone = whatsapp_same_as_phone
+        user.preferred_contact_method = preferred_contact_method
+        self.db.commit()
+        self.db.refresh(user)
+        return user
 
     def seed_defaults(self) -> None:
         """Reset users table to standard demo user state for test isolation without cascading deletes."""

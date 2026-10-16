@@ -10,6 +10,7 @@ import {
 import { PageHeader } from '../components/common/PageHeader';
 import { StatCard } from '../components/common/StatCard';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ItemImage } from '../components/common/ItemImage';
 import { useApp } from '../context/AppContext';
 import { formatDate } from '../utils/formatters';
 import type { ClaimStatus } from '../types';
@@ -206,9 +207,11 @@ export const AdminDashboardPage: React.FC = () => {
                 {items.map((item) => (
                   <tr key={item.id} className="hover:bg-findit-card-hover transition-colors">
                     <td className="py-3.5 px-4 flex items-center gap-3">
-                      <img
+                      <ItemImage
                         src={item.imageUrl}
                         alt={item.title}
+                        category={item.category}
+                        itemType={item.type}
                         className="w-10 h-10 rounded-lg object-cover border border-findit-border shrink-0"
                       />
                       <div className="min-w-0">

@@ -33,8 +33,10 @@ class SqlAlchemyNotificationRepository:
         link = "/dashboard/notifications"
         if notif.notification_type == "match_found":
             link = "/dashboard/ai-matches"
+        elif notif.notification_type == "new_message":
+            link = "/dashboard/messages"
         elif notif.claim_id:
-            link = f"/dashboard/my-claims"
+            link = "/dashboard/my-claims"
         elif notif.item_id:
             link = f"/dashboard/items/{notif.item_id}"
 

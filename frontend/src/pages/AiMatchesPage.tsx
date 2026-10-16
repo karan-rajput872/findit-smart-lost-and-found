@@ -25,6 +25,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { EmptyState } from '../components/common/EmptyState';
 import { LoadingState } from '../components/common/LoadingState';
+import { ItemImage } from '../components/common/ItemImage';
 import { useApp } from '../context/AppContext';
 import { formatDate } from '../utils/formatters';
 
@@ -298,7 +299,7 @@ export const AiMatchesPage: React.FC = () => {
 
         <div className="p-5 rounded-2xl bg-findit-card border border-findit-border shadow-sm space-y-1">
           <div className="text-xs text-findit-secondary font-medium flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-findit-secondary animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-findit-secondary" />
             Strong (80%+)
           </div>
           <div className="text-2xl font-black text-white">
@@ -532,17 +533,13 @@ export const AiMatchesPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      {match.lostItem?.imageUrl ? (
-                        <img
-                          src={match.lostItem.imageUrl}
-                          alt={match.lostItem.title}
-                          className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-xl bg-findit-card flex items-center justify-center border border-findit-border shrink-0 text-findit-subtle text-[10px]">
-                          No Photo
-                        </div>
-                      )}
+                      <ItemImage
+                        src={match.lostItem?.imageUrl}
+                        alt={match.lostItem?.title || 'Reported Lost Item'}
+                        category={match.lostItem?.category}
+                        itemType="lost"
+                        className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
+                      />
                       <div className="min-w-0 flex-1">
                         <h4 className="text-sm font-bold text-white truncate">
                           {match.lostItem?.title || 'Reported Lost Item'}
@@ -584,17 +581,13 @@ export const AiMatchesPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      {match.foundItem?.imageUrl ? (
-                        <img
-                          src={match.foundItem.imageUrl}
-                          alt={match.foundItem.title}
-                          className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-xl bg-findit-card flex items-center justify-center border border-findit-border shrink-0 text-findit-subtle text-[10px]">
-                          No Photo
-                        </div>
-                      )}
+                      <ItemImage
+                        src={match.foundItem?.imageUrl}
+                        alt={match.foundItem?.title || 'Reported Found Item'}
+                        category={match.foundItem?.category}
+                        itemType="found"
+                        className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
+                      />
                       <div className="min-w-0 flex-1">
                         <h4 className="text-sm font-bold text-white truncate">
                           {match.foundItem?.title || 'Reported Found Item'}

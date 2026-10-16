@@ -87,9 +87,9 @@ if ($portOccupied) {
 # 4. Environment check
 $envPath = Join-Path $backendDir ".env"
 if (-not (Test-Path $envPath)) {
-    Write-Host "[NOTICE] backend/.env not found. Operating in in-memory development mode." -ForegroundColor Yellow
+    Write-Host "[INFO] backend/.env not found. Using default persistent SQLite database (backend/data/findit.db)." -ForegroundColor Green
 } else {
-    Write-Host "[INFO] Loaded environment configuration from backend/.env" -ForegroundColor Gray
+    Write-Host "[INFO] Loaded environment configuration from backend/.env" -ForegroundColor Green
 }
 
 # 5. Start Uvicorn

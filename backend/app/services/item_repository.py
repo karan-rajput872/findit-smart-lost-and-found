@@ -67,6 +67,31 @@ class ItemRepositoryInterface(Protocol):
         ...
 
 
+def get_default_item_image(title: str, category: str, item_type: str) -> str:
+    combined = f"{title} {category}".lower()
+    if any(k in combined for k in ["bottle", "flask", "hydro", "mug", "cup"]):
+        return "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["calculator", "graphing", "scientific"]):
+        return "https://images.unsplash.com/photo-1587145820266-a5951ee6f620?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["necklace", "jewelry", "ring", "bracelet", "earring"]):
+        return "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["watch", "timepiece", "rolex", "smartwatch"]):
+        return "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["key", "fob", "lanyard"]):
+        return "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["wallet", "cardholder", "purse", "backpack", "bag"]):
+        return "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["headphone", "earbud", "airpod", "headset"]):
+        return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["laptop", "macbook", "computer", "ipad", "tablet", "electronic"]):
+        return "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80"
+    if any(k in combined for k in ["book", "notebook", "textbook", "binder", "folder"]):
+        return "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80"
+    if item_type.lower() == "lost":
+        return "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80"
+    return "https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=800&q=80"
+
+
 class SqlAlchemyItemRepository:
     """SQLAlchemy persistent repository managing item listings, search, and aggregates."""
 
@@ -195,11 +220,16 @@ class SqlAlchemyItemRepository:
         item = self._find_item_entity(item_id)
         return item.to_response() if item else None
 
+
     def create(self, item_in: ItemCreate, user_id: Optional[str] = None) -> ItemResponse:
         """Persist a new lost or found item report."""
         now_ts = int(datetime.utcnow().timestamp())
         unique_suffix = uuid.uuid4().hex[:4]
         new_id = f"item_{now_ts}_{unique_suffix}"
+
+        assigned_image = item_in.imageUrl or get_default_item_image(
+            item_in.title, item_in.category, item_in.type
+        )
 
         db_item = Item(
             id=new_id,
@@ -211,7 +241,7 @@ class SqlAlchemyItemRepository:
             location=item_in.location,
             campus=item_in.campus,
             date=item_in.date,
-            image_url=item_in.imageUrl,
+            image_url=assigned_image,
             reporter_name=item_in.reporterName or "Campus Reporter",
             reporter_contact=item_in.reporterContact,
             status="open",

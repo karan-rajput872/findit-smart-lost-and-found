@@ -64,6 +64,10 @@ export interface User {
   campus: string;
   role: 'student' | 'staff' | 'admin';
   avatarUrl?: string;
+  phoneNumber?: string;
+  whatsappNumber?: string;
+  whatsappSameAsPhone?: boolean;
+  preferredContactMethod?: 'findit_chat' | 'whatsapp' | 'phone_call';
 }
 
 export type ClaimStatus =
@@ -96,12 +100,52 @@ export interface Claim {
   reviewNotes?: string;
   handoverStatus?: HandoverStatus;
   handoverDetails?: string;
+  claimantContactShared?: boolean;
+  ownerContactShared?: boolean;
   createdAt?: string;
   updatedAt?: string;
   // Legacy / UI aliases
   dateSubmitted?: string;
   proofDescription?: string;
   resolvedAt?: string;
+}
+
+export interface ContactInfo {
+  mutualConsent: boolean;
+  userConsent: boolean;
+  otherPartyConsent: boolean;
+  otherPartyRole: 'finder' | 'claimant';
+  otherPartyName: string;
+  preferredMethod?: 'findit_chat' | 'whatsapp' | 'phone_call';
+  phoneNumber?: string;
+  whatsappNumber?: string;
+  whatsappUrl?: string;
+  canChat: boolean;
+}
+
+export interface Message {
+  id: string;
+  claimId: string;
+  senderId: string;
+  senderName: string;
+  recipientId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface ConversationSummary {
+  claimId: string;
+  itemId: string;
+  itemTitle: string;
+  itemType?: ItemType;
+  claimStatus: ClaimStatus;
+  otherPartyId: string;
+  otherPartyName: string;
+  otherPartyAvatar?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount: number;
 }
 
 export interface Notification {

@@ -12,8 +12,12 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  MessageSquare,
+  Smartphone,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { getAvatarFallback } from '../../utils/imageUtils';
+import { ContactSettingsModal } from '../ContactSettingsModal';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -30,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
   } = useApp();
 
   const [panelOpen, setPanelOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const effectiveUnread = unreadNotifCount > 0 ? unreadNotifCount : notifications.filter((n) => !n.isRead && !n.read).length;
@@ -71,6 +76,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
         return <FileText className="w-4 h-4 text-amber-400 shrink-0" />;
       case 'handover_arranged':
         return <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />;
+      case 'new_message':
+        return <MessageSquare className="w-4 h-4 text-findit-primary shrink-0" />;
+      case 'contact_shared':
+        return <Smartphone className="w-4 h-4 text-emerald-400 shrink-0" />;
       default:
         return <Bell className="w-4 h-4 text-findit-primary shrink-0" />;
     }
@@ -122,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
           >
             <Bell className="w-4 h-4" />
             {effectiveUnread > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-findit-primary text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-findit-primary text-white text-[10px] font-bold flex items-center justify-center">
                 {effectiveUnread > 9 ? '9+' : effectiveUnread}
               </span>
             )}
@@ -221,23 +230,38 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
           )}
         </div>
 
-        {/* User Badge */}
+        {/* User Badge & Contact Settings */}
         <div className="flex items-center gap-2 pl-2 border-l border-findit-border/80">
-          <img
-            src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80'}
-            alt={user.fullName}
-            className="w-8 h-8 rounded-xl object-cover border border-findit-border"
-          />
-          <div className="hidden md:block text-left">
-            <span className="block text-xs font-bold text-findit-text leading-tight">
-              {user.fullName}
-            </span>
-            <span className="block text-[10px] text-findit-subtle leading-tight">
-              {user.role.toUpperCase()}
-            </span>
-          </div>
+          <button
+            type="button"
+            onClick={() => setContactModalOpen(true)}
+            className="flex items-center gap-2 p-1.5 -m-1.5 rounded-xl hover:bg-findit-card/80 transition-colors text-left group"
+            title="Manage Contact & WhatsApp Coordination Settings"
+          >
+            <img
+              src={user.avatarUrl || getAvatarFallback(user.fullName)}
+              alt={user.fullName}
+              className="w-8 h-8 rounded-xl object-cover border border-findit-border group-hover:border-findit-primary transition-colors"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getAvatarFallback(user.fullName);
+              }}
+            />
+            <div className="hidden md:block text-left">
+              <span className="block text-xs font-bold text-findit-text group-hover:text-white leading-tight">
+                {user.fullName}
+              </span>
+              <span className="block text-[10px] text-findit-primary leading-tight font-medium">
+                Contact Settings
+              </span>
+            </div>
+          </button>
         </div>
       </div>
+
+      <ContactSettingsModal
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
     </header>
   );
 };

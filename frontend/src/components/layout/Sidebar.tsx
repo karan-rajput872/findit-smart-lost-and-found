@@ -13,9 +13,11 @@ import {
   LogOut,
   ShieldCheck,
   Inbox,
+  MessageSquare,
 } from 'lucide-react';
 import { BrandLogo } from '../common/BrandLogo';
 import { useApp } from '../../context/AppContext';
+import { getAvatarFallback } from '../../utils/imageUtils';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,7 +26,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { user, notifications, myClaims, receivedClaims, logout, isAuthenticated, unreadNotifCount } = useApp();
+  const { user, notifications, myClaims, receivedClaims, logout, isAuthenticated, unreadNotifCount, unreadMessagesCount } = useApp();
   const effectiveUnread = unreadNotifCount > 0 ? unreadNotifCount : notifications.filter((n) => !n.isRead && !n.read).length;
 
   const handleLogout = async () => {
@@ -56,6 +58,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       path: '/dashboard/received-claims',
       icon: Inbox,
       count: pendingReceivedCount > 0 ? pendingReceivedCount : undefined,
+    },
+    {
+      label: 'Messages',
+      path: '/dashboard/messages',
+      icon: MessageSquare,
+      count: unreadMessagesCount > 0 ? unreadMessagesCount : undefined,
     },
     { label: 'AI Matches', path: '/dashboard/ai-matches', icon: Sparkles, badge: 'Prototype' },
     { label: 'Notifications', path: '/dashboard/notifications', icon: Bell, count: effectiveUnread },
@@ -149,9 +157,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="p-4 border-t border-findit-border bg-findit-bg/40 space-y-2">
           <div className="flex items-center gap-3">
             <img
-              src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80'}
+              src={user.avatarUrl || getAvatarFallback(user.fullName)}
               alt={user.fullName}
               className="w-9 h-9 rounded-xl object-cover border border-findit-border/80 shrink-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getAvatarFallback(user.fullName);
+              }}
             />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-findit-text truncate">{user.fullName}</p>

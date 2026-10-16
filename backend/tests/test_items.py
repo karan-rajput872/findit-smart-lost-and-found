@@ -311,3 +311,41 @@ def test_delete_item_not_found(client: TestClient, auth_headers: dict) -> None:
     """Verify 404 response when deleting non-existent item."""
     response = client.delete("/api/v1/items/item_missing_999", headers=auth_headers)
     assert response.status_code == 404
+
+
+def test_upload_image_success(client: TestClient, auth_headers: dict) -> None:
+    """Verify successful image upload, safe filename generation, and static file serving."""
+    import io
+    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4")
+    files = {"file": ("test_wallet.png", dummy_png, "image/png")}
+    response = client.post("/api/v1/items/upload-image", files=files, headers=auth_headers)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "url" in data
+    assert data["url"].startswith("/uploads/item_")
+    assert data["url"].endswith(".png")
+
+    # Verify static file serving
+    static_resp = client.get(data["url"])
+    assert static_resp.status_code == 200
+
+
+def test_upload_image_invalid_type_rejected(client: TestClient, auth_headers: dict) -> None:
+    """Verify non-image files are rejected with 400 Bad Request."""
+    import io
+    dummy_txt = io.BytesIO(b"malicious script or text file")
+    files = {"file": ("test.txt", dummy_txt, "text/plain")}
+    response = client.post("/api/v1/items/upload-image", files=files, headers=auth_headers)
+    assert response.status_code == 400
+    assert "invalid file type" in response.json()["detail"].lower()
+
+
+def test_upload_image_unauthenticated_rejected(client: TestClient) -> None:
+    """Verify unauthenticated upload requests are rejected with 401."""
+    import io
+    dummy_png = io.BytesIO(b"dummy image bytes")
+    files = {"file": ("photo.png", dummy_png, "image/png")}
+    response = client.post("/api/v1/items/upload-image", files=files)
+    assert response.status_code == 401
+

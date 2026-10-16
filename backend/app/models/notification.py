@@ -26,10 +26,14 @@ class NotificationType(str, enum.Enum):
     CLAIM_SUBMITTED = "claim_submitted"
     CLAIM_APPROVED = "claim_approved"
     CLAIM_REJECTED = "claim_rejected"
+    CLAIM_CANCELLED = "claim_cancelled"
     CLAIM_UNDER_REVIEW = "claim_under_review"
     HANDOVER_ARRANGED = "handover_arranged"
+    RETURN_IN_PROGRESS = "return_in_progress"
     ITEM_RETURNED = "item_returned"
     MATCH_FOUND = "match_found"
+    NEW_MESSAGE = "new_message"
+    CONTACT_SHARED = "contact_shared"
     SYSTEM = "system"
 
 

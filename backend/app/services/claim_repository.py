@@ -1,5 +1,5 @@
-"""Persistent SQLAlchemy Claim Repository for Lost & Found Ownership Verification."""
-
+import re
+import urllib.parse
 import uuid
 from datetime import datetime
 from typing import List, Optional, Tuple
@@ -18,6 +18,7 @@ from app.schemas.claim import (
     ClaimHandover,
     ClaimComplete,
     ClaimResponse,
+    ContactInfoResponse,
 )
 from app.services.notification_repository import SqlAlchemyNotificationRepository
 
@@ -88,6 +89,8 @@ class SqlAlchemyClaimRepository:
             reviewNotes=claim.review_notes,
             handoverStatus=claim.handover_status,  # type: ignore[arg-type]
             handoverDetails=claim.handover_details,
+            claimantContactShared=bool(claim.claimant_contact_shared),
+            ownerContactShared=bool(claim.owner_contact_shared),
             createdAt=created_iso,
             updatedAt=updated_iso,
         )
@@ -521,6 +524,149 @@ class SqlAlchemyClaimRepository:
             )
 
         return self._to_response(claim, current_user_id=claimant_id, is_admin=is_admin)
+
+    def set_contact_consent(
+        self,
+        claim_id: str,
+        user_id: str,
+        consent: bool,
+    ) -> ClaimResponse:
+        """Explicitly grant or revoke consent to share phone/WhatsApp contact details."""
+        claim = self.db.query(Claim).filter(Claim.id == claim_id).first()
+        if not claim:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Claim with ID '{claim_id}' not found.",
+            )
+
+        is_claimant = claim.claimant_id == user_id
+        is_owner = claim.item_owner_id == user_id
+        if not is_claimant and not is_owner:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not authorized to update contact consent for this claim.",
+            )
+
+        if claim.status.lower() not in ["approved", "completed"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Contact sharing can only be enabled on approved claims.",
+            )
+
+        if is_claimant:
+            claim.claimant_contact_shared = consent
+        else:
+            claim.owner_contact_shared = consent
+
+        claim.updated_at = datetime.utcnow()
+        self.db.commit()
+        self.db.refresh(claim)
+
+        # Notify the other party if consent was granted
+        if consent:
+            other_user_id = claim.item_owner_id if is_claimant else claim.claimant_id
+            if other_user_id:
+                user_record = claim.claimant if is_claimant else claim.item_owner
+                actor_name = user_record.full_name if user_record else "The other party"
+                item_title = claim.item.title if claim.item else "item"
+                self.notif_repo.create(
+                    user_id=other_user_id,
+                    title="Contact Details Shared 📱",
+                    message=(
+                        f"{actor_name} has consented to share contact details for '{item_title}'. "
+                        "Share your contact details to unlock WhatsApp or phone calling."
+                    ),
+                    notification_type="contact_shared",
+                    item_id=claim.item_id,
+                    claim_id=claim.id,
+                )
+
+        return self._to_response(claim, current_user_id=user_id)
+
+    def get_contact_info(
+        self,
+        claim_id: str,
+        user_id: str,
+    ) -> ContactInfoResponse:
+        """Securely retrieve counterpart contact details strictly under mutual consent."""
+        claim = self.db.query(Claim).filter(Claim.id == claim_id).first()
+        if not claim:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Claim with ID '{claim_id}' not found.",
+            )
+
+        is_claimant = claim.claimant_id == user_id
+        is_owner = claim.item_owner_id == user_id
+        if not is_claimant and not is_owner:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view contact details for this claim.",
+            )
+
+        other_role = "finder" if is_claimant else "claimant"
+        other_user = claim.item_owner if is_claimant else claim.claimant
+        other_name = other_user.full_name if other_user else "Campus User"
+
+        # If claim is not approved or completed, contact details are completely locked
+        if claim.status.lower() not in ["approved", "completed"]:
+            return ContactInfoResponse(
+                mutualConsent=False,
+                userConsent=False,
+                otherPartyConsent=False,
+                otherPartyRole=other_role,
+                otherPartyName=other_name,
+                preferredMethod=None,
+                phoneNumber=None,
+                whatsappNumber=None,
+                whatsappUrl=None,
+                canChat=False,
+            )
+
+        user_consent = bool(claim.claimant_contact_shared if is_claimant else claim.owner_contact_shared)
+        other_consent = bool(claim.owner_contact_shared if is_claimant else claim.claimant_contact_shared)
+        mutual_consent = user_consent and other_consent
+
+        phone_num = None
+        whatsapp_num = None
+        whatsapp_url = None
+        preferred = None
+
+        if other_user:
+            preferred = other_user.preferred_contact_method or "findit_chat"
+
+            # Mutual consent unlocks phone and WhatsApp numbers
+            if mutual_consent:
+                phone_num = other_user.phone_number
+                # If same as phone, use phone number if whatsapp not explicitly given
+                if other_user.whatsapp_same_as_phone and phone_num:
+                    whatsapp_num = phone_num
+                else:
+                    whatsapp_num = other_user.whatsapp_number
+
+                if whatsapp_num:
+                    clean_digits = re.sub(r"\D", "", whatsapp_num)
+                    if len(clean_digits) >= 7:
+                        item_title = claim.item.title if claim.item else "your item"
+                        prefill = (
+                            f"Hello! I am coordinating the return of '{item_title}' on FindIt. "
+                            "Please let me know when we can discuss the handover."
+                        )
+                        encoded_msg = urllib.parse.quote(prefill)
+                        whatsapp_url = f"https://wa.me/{clean_digits}?text={encoded_msg}"
+
+        return ContactInfoResponse(
+            mutualConsent=mutual_consent,
+            userConsent=user_consent,
+            otherPartyConsent=other_consent,
+            otherPartyRole=other_role,
+            otherPartyName=other_name,
+            preferredMethod=preferred if (mutual_consent or other_consent) else None,
+            phoneNumber=phone_num,
+            whatsappNumber=whatsapp_num,
+            whatsappUrl=whatsapp_url,
+            canChat=True,
+        )
 
 
 def get_claim_repository(db: Session = Depends(get_db)) -> SqlAlchemyClaimRepository:

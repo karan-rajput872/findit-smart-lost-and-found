@@ -5,6 +5,8 @@ import type { Item } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { formatDate, getCategoryBadgeColor } from '../../utils/formatters';
 
+import { ItemImage } from '../common/ItemImage';
+
 interface ItemCardProps {
   item: Item;
   showActions?: boolean;
@@ -22,16 +24,13 @@ export const ItemCard: React.FC<ItemCardProps> = ({
     <div className="flex flex-col rounded-2xl bg-findit-card border border-findit-border overflow-hidden card-hover group h-full">
       {/* Thumbnail Area */}
       <div className="relative aspect-[16/10] overflow-hidden bg-findit-sidebar">
-        <img
+        <ItemImage
           src={item.imageUrl}
           alt={item.title}
+          category={item.category}
+          itemType={item.type}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
-          onError={(e) => {
-            // Fallback placeholder image if network issue occurs
-            (e.target as HTMLImageElement).src =
-              'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=800&q=80';
-          }}
         />
         
         {/* Top Badges Overlay */}

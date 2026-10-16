@@ -162,6 +162,16 @@ class ClaimResponse(BaseModel):
         validation_alias=AliasChoices("handoverDetails", "handover_details"),
         description="Arrangement instructions or meeting point",
     )
+    claimantContactShared: bool = Field(
+        False,
+        validation_alias=AliasChoices("claimantContactShared", "claimant_contact_shared"),
+        description="Whether claimant has consented to share contact info",
+    )
+    ownerContactShared: bool = Field(
+        False,
+        validation_alias=AliasChoices("ownerContactShared", "owner_contact_shared"),
+        description="Whether finder has consented to share contact info",
+    )
     createdAt: str = Field(
         ...,
         validation_alias=AliasChoices("createdAt", "created_at"),
@@ -174,6 +184,71 @@ class ClaimResponse(BaseModel):
     )
 
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
+
+
+class ClaimContactConsent(BaseModel):
+    """Payload to grant or revoke contact sharing consent for an approved claim."""
+
+    consent: bool = Field(..., description="Whether user grants explicit consent to share contact details")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ContactInfoResponse(BaseModel):
+    """Secure contact details returned strictly when claim is approved and mutual consent is given."""
+
+    mutualConsent: bool = Field(
+        ...,
+        validation_alias=AliasChoices("mutualConsent", "mutual_consent"),
+        description="Whether both parties have granted explicit consent",
+    )
+    userConsent: bool = Field(
+        ...,
+        validation_alias=AliasChoices("userConsent", "user_consent"),
+        description="Whether current user has granted consent",
+    )
+    otherPartyConsent: bool = Field(
+        ...,
+        validation_alias=AliasChoices("otherPartyConsent", "other_party_consent"),
+        description="Whether other party has granted consent",
+    )
+    otherPartyRole: str = Field(
+        ...,
+        validation_alias=AliasChoices("otherPartyRole", "other_party_role"),
+        description="finder or claimant",
+    )
+    otherPartyName: str = Field(
+        ...,
+        validation_alias=AliasChoices("otherPartyName", "other_party_name"),
+        description="Full name of other party",
+    )
+    preferredMethod: Optional[str] = Field(
+        None,
+        validation_alias=AliasChoices("preferredMethod", "preferred_method"),
+        description="findit_chat, whatsapp, or phone_call",
+    )
+    phoneNumber: Optional[str] = Field(
+        None,
+        validation_alias=AliasChoices("phoneNumber", "phone_number"),
+        description="Private phone number (only if mutual consent)",
+    )
+    whatsappNumber: Optional[str] = Field(
+        None,
+        validation_alias=AliasChoices("whatsappNumber", "whatsapp_number"),
+        description="Private WhatsApp number (only if mutual consent)",
+    )
+    whatsappUrl: Optional[str] = Field(
+        None,
+        validation_alias=AliasChoices("whatsappUrl", "whatsapp_url"),
+        description="Safe pre-filled WhatsApp click-to-chat URL",
+    )
+    canChat: bool = Field(
+        True,
+        validation_alias=AliasChoices("canChat", "can_chat"),
+        description="Whether internal FindIt chat is accessible",
+    )
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class ClaimListResponse(BaseModel):

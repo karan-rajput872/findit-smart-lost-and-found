@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { ItemImage } from '../components/common/ItemImage';
 import { useApp } from '../context/AppContext';
 
 export const LandingPage: React.FC = () => {
@@ -92,9 +93,11 @@ export const LandingPage: React.FC = () => {
                   className="rounded-2xl bg-findit-bg/80 border border-findit-border p-3.5 text-left space-y-2.5"
                 >
                   <div className="aspect-[16/10] rounded-xl overflow-hidden relative">
-                    <img
+                    <ItemImage
                       src={item.imageUrl}
                       alt={item.title}
+                      category={item.category}
+                      itemType={item.type}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute top-2 left-2">

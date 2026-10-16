@@ -18,6 +18,7 @@ import { MyClaimsPage } from './pages/MyClaimsPage';
 import { ReceivedClaimsPage } from './pages/ReceivedClaimsPage';
 import { AiMatchesPage } from './pages/AiMatchesPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { MessagesPage } from './pages/MessagesPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
@@ -52,6 +53,7 @@ export const App: React.FC = () => {
             <Route path="received-claims" element={<ReceivedClaimsPage />} />
             <Route path="ai-matches" element={<AiMatchesPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="messages" element={<MessagesPage />} />
           </Route>
 
           {/* Administration Portal Route */}

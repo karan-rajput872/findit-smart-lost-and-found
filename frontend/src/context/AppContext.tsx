@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { Item, User, Claim, Notification, PotentialMatch, ItemStatus, ClaimStatus, ItemStats, HandoverStatus } from '../types';
+import type { Item, User, Claim, Notification, PotentialMatch, ItemStatus, ClaimStatus, ItemStats, HandoverStatus, ConversationSummary } from '../types';
 import { INITIAL_ITEMS, DEMO_USER, DEMO_NOTIFICATIONS, DEMO_CLAIMS, DEMO_POTENTIAL_MATCHES } from '../data/mockData';
 import {
   checkBackendHealth,
@@ -14,6 +14,7 @@ import {
   fetchCurrentUserApi,
   logoutApi,
   getStoredToken,
+  removeStoredToken,
   fetchMyClaimsApi,
   fetchReceivedClaimsApi,
   submitClaimApi,
@@ -21,6 +22,10 @@ import {
   updateHandoverApi,
   completeReturnApi,
   cancelClaimApi,
+  updateContactProfileApi,
+  setContactConsentApi,
+  fetchActiveConversationsApi,
+  type UpdateContactPayload,
   fetchNotificationsApi,
   markNotificationReadApi,
   markAllNotificationsReadApi,
@@ -81,6 +86,11 @@ interface AppContextType {
   updateClaimStatus: (id: string, status: ClaimStatus) => void;
   markNotificationAsRead: (id: string) => Promise<void>;
   markAllNotificationsAsRead: () => Promise<void>;
+  activeConversations: ConversationSummary[];
+  unreadMessagesCount: number;
+  refreshActiveConversations: () => Promise<void>;
+  updateContactProfile: (payload: UpdateContactPayload) => Promise<User>;
+  setContactConsent: (claimId: string, consent: boolean) => Promise<Claim>;
   resetDemoData: () => void;
 }
 
@@ -153,6 +163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     weakCount: 0,
   });
 
+  const [activeConversations, setActiveConversations] = useState<ConversationSummary[]>([]);
   const [myItems, setMyItems] = useState<Item[]>([]);
   const [stats, setStats] = useState<ItemStats | null>(null);
 
@@ -263,6 +274,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [fetchPotentialMatches]);
 
+  const refreshActiveConversations = useCallback(async () => {
+    if (!getStoredToken()) return;
+    try {
+      const convs = await fetchActiveConversationsApi();
+      setActiveConversations(convs);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const refreshBackendData = useCallback(async () => {
     setIsLoadingItems(true);
     setBackendError(null);
@@ -301,11 +322,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         fetchReceivedClaims();
         fetchNotifications();
         fetchPotentialMatches();
+        refreshActiveConversations();
       }
     }
 
     setIsLoadingItems(false);
-  }, [fetchMyItems, fetchMyClaims, fetchReceivedClaims, fetchNotifications, fetchPotentialMatches]);
+  }, [fetchMyItems, fetchMyClaims, fetchReceivedClaims, fetchNotifications, fetchPotentialMatches, refreshActiveConversations]);
 
   // Rehydrate authenticated user session on mount
   useEffect(() => {
@@ -325,6 +347,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(currentUser));
       } catch (err) {
         console.warn('Session rehydration failed or token expired:', err);
+        removeStoredToken();
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        setUser(DEMO_USER);
         setIsAuthenticated(false);
       } finally {
         setIsLoadingAuth(false);
@@ -381,6 +406,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err) {
       console.warn('Backend logout warning:', err);
     }
+    removeStoredToken();
     setUser(DEMO_USER);
     setIsAuthenticated(false);
     setMyItems([]);
@@ -552,6 +578,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUnreadNotifCount(0);
   };
 
+  const updateContactProfile = async (payload: UpdateContactPayload): Promise<User> => {
+    if (backendStatus.isOnline && getStoredToken()) {
+      const updatedUser = await updateContactProfileApi(payload);
+      setUser(updatedUser);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+      return updatedUser;
+    }
+    const updatedUser = { ...user, ...payload };
+    setUser(updatedUser);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+    return updatedUser;
+  };
+
+  const setContactConsent = async (claimId: string, consent: boolean): Promise<Claim> => {
+    if (backendStatus.isOnline && getStoredToken()) {
+      const updated = await setContactConsentApi(claimId, consent);
+      setMyClaims((prev) => prev.map((c) => (c.id === claimId ? updated : c)));
+      setReceivedClaims((prev) => prev.map((c) => (c.id === claimId ? updated : c)));
+      return updated;
+    }
+    throw new Error('Backend required to update contact consent.');
+  };
+
+  const unreadMessagesCount = activeConversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+
   const resetDemoData = () => {
     setItems(INITIAL_ITEMS);
     setMyClaims(DEMO_CLAIMS);
@@ -610,6 +661,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateClaimStatus,
         markNotificationAsRead,
         markAllNotificationsAsRead,
+        activeConversations,
+        unreadMessagesCount,
+        refreshActiveConversations,
+        updateContactProfile,
+        setContactConsent,
         resetDemoData,
       }}
     >

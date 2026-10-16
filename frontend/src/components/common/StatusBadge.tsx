@@ -19,7 +19,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type, size = '
       >
         <span
           className={`w-1.5 h-1.5 rounded-full ${
-            isLost ? 'bg-red-400 animate-pulse' : 'bg-teal-400'
+            isLost ? 'bg-red-400' : 'bg-teal-400'
           }`}
         />
         {isLost ? 'Lost Item' : 'Found Item'}

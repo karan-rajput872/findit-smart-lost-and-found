@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { ConfirmationDialog } from '../components/common/ConfirmationDialog';
+import { ItemImage } from '../components/common/ItemImage';
 import { useApp } from '../context/AppContext';
 import { fetchItemByIdApi } from '../services/api';
 import { formatDate, getCategoryBadgeColor } from '../utils/formatters';
@@ -280,9 +281,11 @@ export const ItemDetailsPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Image Side */}
           <div className="relative aspect-[4/3] md:aspect-auto bg-findit-sidebar overflow-hidden min-h-[300px]">
-            <img
+            <ItemImage
               src={item.imageUrl}
               alt={item.title}
+              category={item.category}
+              itemType={item.type}
               className="w-full h-full object-cover"
             />
             <div className="absolute top-4 left-4 flex items-center gap-2">

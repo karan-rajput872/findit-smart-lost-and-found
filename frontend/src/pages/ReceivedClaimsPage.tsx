@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { EmptyState } from '../components/common/EmptyState';
+import { ClaimCoordinationCard } from '../components/ClaimCoordinationCard';
 import { useApp } from '../context/AppContext';
 import type { Claim, ClaimStatus, HandoverStatus } from '../types';
 
@@ -280,96 +281,109 @@ export const ReceivedClaimsPage: React.FC = () => {
           {filteredClaims.map((claim) => (
             <div
               key={claim.id}
-              className="p-5 rounded-2xl bg-findit-card border border-findit-border hover:border-findit-primary/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="p-5 rounded-2xl bg-findit-card border border-findit-border hover:border-findit-primary/40 transition-all flex flex-col gap-3"
             >
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-sm font-bold text-white truncate">
-                    {claim.itemTitle || `Claim for Item #${claim.itemId}`}
-                  </h3>
-                  {getStatusBadge(claim.status)}
-                </div>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-bold text-white truncate">
+                      {claim.itemTitle || `Claim for Item #${claim.itemId}`}
+                    </h3>
+                    {getStatusBadge(claim.status)}
+                  </div>
 
-                <div className="text-xs text-findit-muted flex items-center gap-2">
-                  <User className="w-3.5 h-3.5 text-findit-primary" />
-                  <span>Claimant: <strong className="text-findit-text">{claim.claimantName || 'Campus Member'}</strong></span>
-                  {claim.claimantEmail && (
-                    <span className="text-[11px] text-findit-subtle font-mono">({claim.claimantEmail})</span>
+                  <div className="text-xs text-findit-muted flex items-center gap-2">
+                    <User className="w-3.5 h-3.5 text-findit-primary" />
+                    <span>Claimant: <strong className="text-findit-text">{claim.claimantName || 'Campus Member'}</strong></span>
+                    {claim.claimantEmail && (
+                      <span className="text-[11px] text-findit-subtle font-mono">({claim.claimantEmail})</span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-findit-muted line-clamp-2">
+                    <span className="font-semibold text-findit-text">Claim explanation:</span> {claim.description}
+                  </p>
+
+                  {claim.proofDetails && (
+                    <p className="text-xs text-amber-300/90 flex items-center gap-1 font-mono">
+                      <Lock className="w-3 h-3 text-amber-400" />
+                      <span className="truncate">Confidential proof provided: {claim.proofDetails}</span>
+                    </p>
                   )}
                 </div>
 
-                <p className="text-xs text-findit-muted line-clamp-2">
-                  <span className="font-semibold text-findit-text">Claim explanation:</span> {claim.description}
-                </p>
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2 self-end md:self-center shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClaim(claim)}
+                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-findit-card border border-findit-border hover:bg-findit-card/80 transition-all flex items-center gap-1.5"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Inspect</span>
+                  </button>
 
-                {claim.proofDetails && (
-                  <p className="text-xs text-amber-300/90 flex items-center gap-1 font-mono">
-                    <Lock className="w-3 h-3 text-amber-400" />
-                    <span className="truncate">Confidential proof provided: {claim.proofDetails}</span>
-                  </p>
-                )}
+                  {/* Approve/Reject when pending or under review */}
+                  {['pending', 'under_review'].includes(claim.status.toLowerCase()) && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenReview(claim, 'approved')}
+                        className="px-3 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-all flex items-center gap-1 shadow-sm"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Approve</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenReview(claim, 'rejected')}
+                        className="px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all flex items-center gap-1"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Reject</span>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Handover & Complete Return when approved */}
+                  {claim.status.toLowerCase() === 'approved' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenHandover(claim)}
+                        className="px-3 py-2 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all flex items-center gap-1"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        <span>Handover Notes</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCompleteClaimTarget(claim);
+                          setCompletionNotes('');
+                        }}
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-findit-primary hover:opacity-95 shadow-glow-primary transition-all flex items-center gap-1.5"
+                      >
+                        <PackageCheck className="w-3.5 h-3.5" />
+                        <span>Confirm Return</span>
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2 self-end md:self-center shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setSelectedClaim(claim)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-findit-card border border-findit-border hover:bg-findit-card/80 transition-all flex items-center gap-1.5"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Inspect</span>
-                </button>
-
-                {/* Approve/Reject when pending or under review */}
-                {['pending', 'under_review'].includes(claim.status.toLowerCase()) && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenReview(claim, 'approved')}
-                      className="px-3 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-all flex items-center gap-1 shadow-sm"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Approve</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleOpenReview(claim, 'rejected')}
-                      className="px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all flex items-center gap-1"
-                    >
-                      <XCircle className="w-3.5 h-3.5" />
-                      <span>Reject</span>
-                    </button>
-                  </>
-                )}
-
-                {/* Handover & Complete Return when approved */}
-                {claim.status.toLowerCase() === 'approved' && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenHandover(claim)}
-                      className="px-3 py-2 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all flex items-center gap-1"
-                    >
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>Coordinate Handover</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCompleteClaimTarget(claim);
-                        setCompletionNotes('');
-                      }}
-                      className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-findit-primary hover:opacity-95 shadow-glow-primary transition-all flex items-center gap-1.5"
-                    >
-                      <PackageCheck className="w-3.5 h-3.5" />
-                      <span>Confirm Return</span>
-                    </button>
-                  </>
-                )}
-              </div>
+              {/* Direct Return Coordination & Contact Widget */}
+              {['approved', 'completed'].includes(claim.status.toLowerCase()) && (
+                <div className="pt-2 border-t border-findit-border/70">
+                  <ClaimCoordinationCard
+                    claim={claim}
+                    isOwnerView={true}
+                    onStatusChange={fetchReceivedClaims}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

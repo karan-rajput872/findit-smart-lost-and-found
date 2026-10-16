@@ -5,7 +5,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.services.user_repository import get_user_repository
-from app.core.security import create_access_token
+from app.core.security import (
+    create_access_token,
+    get_password_hash,
+    verify_password,
+    verify_and_update_password,
+)
+from app.db.session import SessionLocal
+from app.models.user import User
 
 
 @pytest.fixture(autouse=True)
@@ -212,3 +219,178 @@ def test_logout_endpoint(client: TestClient) -> None:
     response = client.post("/api/v1/auth/logout")
     assert response.status_code == 200
     assert response.json()["status"] == "logged_out"
+
+
+def test_login_with_username_prefix(client: TestClient) -> None:
+    """Verify login works using username prefix before @."""
+    payload = {
+        "email": "alex.morgan",
+        "password": "CampusPass123!",
+    }
+    response = client.post("/api/v1/auth/login", json=payload)
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == "alex.morgan@campus.edu"
+
+
+def test_login_with_full_name(client: TestClient) -> None:
+    """Verify login works using user's full name."""
+    payload = {
+        "email": "Alex Morgan",
+        "password": "CampusPass123!",
+    }
+    response = client.post("/api/v1/auth/login", json=payload)
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == "alex.morgan@campus.edu"
+
+
+def test_login_case_insensitivity(client: TestClient) -> None:
+    """Verify email case insensitivity during login."""
+    payload = {
+        "email": "ALEX.MORGAN@CAMPUS.EDU",
+        "password": "CampusPass123!",
+    }
+    response = client.post("/api/v1/auth/login", json=payload)
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == "alex.morgan@campus.edu"
+
+
+def test_login_with_username_alias_field(client: TestClient) -> None:
+    """Verify login accepting 'username' or 'identifier' JSON key."""
+    payload = {
+        "username": "alex.morgan@campus.edu",
+        "password": "CampusPass123!",
+    }
+    response = client.post("/api/v1/auth/login", json=payload)
+    assert response.status_code == 200
+    assert response.json()["user"]["email"] == "alex.morgan@campus.edu"
+
+
+def test_registration_immediate_login_cycle(client: TestClient) -> None:
+    """Verify user can register and immediately log in with identical credentials."""
+    reg_email = "new.student@campus.edu"
+    reg_pass = "SecurePass123!"
+
+    reg_resp = client.post("/api/v1/auth/register", json={
+        "email": reg_email,
+        "fullName": "New Student",
+        "password": reg_pass,
+        "campus": "Central Campus",
+        "role": "student",
+    })
+    assert reg_resp.status_code == 201
+
+    login_resp = client.post("/api/v1/auth/login", json={
+        "email": reg_email,
+        "password": reg_pass,
+    })
+    assert login_resp.status_code == 200
+    assert login_resp.json()["user"]["email"] == reg_email
+    assert "access_token" in login_resp.json()
+
+
+def test_password_hashing_utilities() -> None:
+    """Verify password hashing, verification, mismatch, and empty checks."""
+    plain = "SuperSecretPassword123!"
+    pw_hash = get_password_hash(plain)
+
+    # Must be non-empty and not plaintext
+    assert pw_hash != plain
+    assert len(pw_hash) > 20
+
+    # Verification
+    assert verify_password(plain, pw_hash) is True
+    assert verify_password("WrongPassword!", pw_hash) is False
+    assert verify_password("", pw_hash) is False
+    assert verify_password(plain, "") is False
+
+    # verify_and_update_password
+    valid, updated_hash = verify_and_update_password(plain, pw_hash)
+    assert valid is True
+
+
+def test_protected_endpoints_require_auth(client: TestClient) -> None:
+    """Verify protected endpoints reject unauthenticated requests and accept valid JWT."""
+    protected_urls = [
+        "/api/v1/auth/me",
+        "/api/v1/items/my-listings",
+        "/api/v1/claims/my-claims",
+        "/api/v1/claims/received",
+        "/api/v1/notifications",
+    ]
+
+    # Without token: all must return 401
+    for url in protected_urls:
+        resp = client.get(url)
+        assert resp.status_code == 401, f"Expected 401 for unauthenticated {url}, got {resp.status_code}"
+
+    # Log in and verify all accept the issued token
+    login_resp = client.post("/api/v1/auth/login", json={
+        "email": "alex.morgan@campus.edu",
+        "password": "CampusPass123!",
+    })
+    token = login_resp.json()["access_token"]
+    auth_header = {"Authorization": f"Bearer {token}"}
+
+    for url in protected_urls:
+        resp = client.get(url, headers=auth_header)
+        assert resp.status_code == 200, f"Expected 200 for authenticated {url}, got {resp.status_code}"
+
+
+def test_user_persistence_in_database(client: TestClient) -> None:
+    """Verify newly registered user is persisted in DB with hashed password and isolated data."""
+    unique_email = "db.persist.check@campus.edu"
+    raw_password = "PersistencePass123!"
+
+    reg_resp = client.post("/api/v1/auth/register", json={
+        "email": unique_email,
+        "fullName": "Persistence Test User",
+        "password": raw_password,
+        "campus": "West Science Campus",
+        "role": "student",
+    })
+    assert reg_resp.status_code == 201
+    user_id = reg_resp.json()["id"]
+
+    # Verify directly in database session
+    db = SessionLocal()
+    try:
+        user_record = db.query(User).filter(User.id == user_id).first()
+        assert user_record is not None
+        assert user_record.email == unique_email
+        assert user_record.full_name == "Persistence Test User"
+        assert user_record.hashed_password != raw_password
+        assert verify_password(raw_password, user_record.hashed_password) is True
+    finally:
+        db.close()
+
+
+def test_session_lifecycle_flow(client: TestClient) -> None:
+    """Verify full Register -> Login -> Refresh /me -> Logout cycle."""
+    email = "lifecycle.user@campus.edu"
+    password = "LifecyclePassword123!"
+
+    # 1. Register
+    reg = client.post("/api/v1/auth/register", json={
+        "email": email,
+        "fullName": "Lifecycle User",
+        "password": password,
+        "campus": "Central Campus",
+        "role": "student",
+    })
+    assert reg.status_code == 201
+
+    # 2. Login
+    login = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+
+    # 3. Fetch profile (simulating page reload with Bearer token)
+    me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me.status_code == 200
+    assert me.json()["email"] == email
+
+    # 4. Logout
+    logout = client.post("/api/v1/auth/logout")
+    assert logout.status_code == 200
+
+
