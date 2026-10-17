@@ -236,6 +236,10 @@ def run_safe_schema_migrations(engine_instance) -> None:
 
 def init_db() -> bool:
     """Initialize database connection, ensure schema exists, and seed if empty."""
+    if engine is None:
+        logger.error("Cannot initialize database schema: database engine is not initialized.")
+        return False
+
     is_connected, msg = check_db_connection()
     if not is_connected:
         logger.error("Failed to connect to database during startup: %s", msg)

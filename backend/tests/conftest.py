@@ -10,6 +10,7 @@ backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, backend_dir)
 
 # CRITICAL: Isolate tests to a dedicated test database so real development records in findit.db are NEVER touched
+os.environ["ENVIRONMENT"] = "testing"
 test_db_path = os.path.join(backend_dir, "data", "test_findit.db").replace("\\", "/")
 os.environ["DATABASE_URL"] = f"sqlite:///{test_db_path}"
 

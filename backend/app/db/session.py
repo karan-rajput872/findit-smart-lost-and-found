@@ -7,35 +7,56 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
+import logging
 from app.core.config import settings
+
+logger = logging.getLogger("findit.db")
+
+
+def _sanitize_db_error_message(message: str) -> str:
+    """Mask sensitive credentials and connection strings from database diagnostics."""
+    if not message:
+        return ""
+    import re
+    sanitized = re.sub(r"://([^:/@]+):([^@]+)@", r"://\1:***@", str(message))
+    sanitized = re.sub(r"(password=)[^&;\s]+", r"\1***", sanitized, flags=re.IGNORECASE)
+    return sanitized
 
 
 def _create_configured_engine():
     """Create and configure SQLAlchemy Engine based on active dialect (SQLite or PostgreSQL)."""
-    uri = settings.sqlalchemy_database_uri
+    try:
+        uri = settings.sqlalchemy_database_uri
+    except Exception as e:
+        logger.error("Failed to determine SQLAlchemy database URI: %s", _sanitize_db_error_message(str(e)))
+        return None
 
-    if settings.is_sqlite:
-        # Guarantee parent directory exists for SQLite database file
-        sqlite_path = settings.SQLITE_DB_PATH
-        db_dir = os.path.dirname(os.path.abspath(sqlite_path))
-        if db_dir:
-            os.makedirs(db_dir, exist_ok=True)
+    try:
+        if settings.is_sqlite:
+            # Guarantee parent directory exists for SQLite database file
+            sqlite_path = settings.SQLITE_DB_PATH
+            db_dir = os.path.dirname(os.path.abspath(sqlite_path))
+            if db_dir:
+                os.makedirs(db_dir, exist_ok=True)
 
-        return create_engine(
-            uri,
-            connect_args={"check_same_thread": False},
-        )
-    else:
-        # Pooled engine for Neon Cloud PostgreSQL or production instances
-        return create_engine(
-            uri,
-            pool_pre_ping=settings.DB_POOL_PRE_PING,
-            pool_size=settings.DB_POOL_SIZE,
-            max_overflow=settings.DB_MAX_OVERFLOW,
-            pool_recycle=settings.DB_POOL_RECYCLE,
-            pool_timeout=settings.DB_POOL_TIMEOUT,
-            connect_args={"connect_timeout": 10},
-        )
+            return create_engine(
+                uri,
+                connect_args={"check_same_thread": False},
+            )
+        else:
+            # Pooled engine for Neon Cloud PostgreSQL or production instances
+            return create_engine(
+                uri,
+                pool_pre_ping=settings.DB_POOL_PRE_PING,
+                pool_size=settings.DB_POOL_SIZE,
+                max_overflow=settings.DB_MAX_OVERFLOW,
+                pool_recycle=settings.DB_POOL_RECYCLE,
+                pool_timeout=settings.DB_POOL_TIMEOUT,
+                connect_args={"connect_timeout": 10},
+            )
+    except Exception as e:
+        logger.error("Failed to create SQLAlchemy engine: %s", _sanitize_db_error_message(str(e)))
+        return None
 
 
 # Global Engine and SessionLocal factory
@@ -61,30 +82,30 @@ def _enforce_sqlite_foreign_keys(dbapi_connection, connection_record):
             pass
 
 
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
+SessionLocal = (
+    sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+    )
+    if engine is not None
+    else None
 )
 
 
 def get_db() -> Generator[Session, None, None]:
     """Dependency that yields a managed database session."""
+    if SessionLocal is None:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=503,
+            detail="Database service unavailable. Please check backend DATABASE_URL configuration.",
+        )
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
-def _sanitize_db_error_message(message: str) -> str:
-    """Mask sensitive credentials and connection strings from database diagnostics."""
-    if not message:
-        return ""
-    import re
-    sanitized = re.sub(r"://([^:/@]+):([^@]+)@", r"://\1:***@", str(message))
-    sanitized = re.sub(r"(password=)[^&;\s]+", r"\1***", sanitized, flags=re.IGNORECASE)
-    return sanitized
 
 
 def check_db_connection() -> Tuple[bool, str]:

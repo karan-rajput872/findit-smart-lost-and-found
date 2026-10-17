@@ -109,3 +109,25 @@ def test_production_with_valid_postgres_url_succeeds() -> None:
     assert s.active_storage_mode == "postgresql"
     assert s.sqlalchemy_database_uri.startswith("postgresql+psycopg://")
     assert "sslmode=require" in s.sqlalchemy_database_uri
+
+
+def test_database_url_quoted_and_prefixed_sanitization() -> None:
+    """Verify that quotes, psql CLI prefixes, semicolons, and whitespace are cleanly sanitized."""
+    from sqlalchemy.engine import make_url
+
+    test_inputs = [
+        "'postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb'",
+        '"postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb"',
+        "psql 'postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb?sslmode=require'",
+        "  '  postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb  '  ",
+        "'postgres://user:pass@ep-test.us-east-2.aws.neon.tech/neondb';",
+    ]
+
+    for raw in test_inputs:
+        s = Settings(ENVIRONMENT="production", DATABASE_URL=raw)
+        uri = s.sqlalchemy_database_uri
+        assert uri.startswith("postgresql+psycopg://")
+        assert "sslmode=require" in uri
+        # Ensure SQLAlchemy can parse the sanitized URL without ArgumentError
+        parsed = make_url(uri)
+        assert parsed.drivername == "postgresql+psycopg"

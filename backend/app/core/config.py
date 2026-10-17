@@ -117,13 +117,19 @@ class Settings(BaseSettings):
     @property
     def is_postgres(self) -> bool:
         """Check whether PostgreSQL is the target dialect."""
-        uri = self.sqlalchemy_database_uri
-        return uri.startswith("postgresql") or uri.startswith("postgres")
+        try:
+            uri = self.sqlalchemy_database_uri
+            return uri.startswith("postgresql") or uri.startswith("postgres")
+        except Exception:
+            return False
 
     @property
     def is_sqlite(self) -> bool:
         """Check whether SQLite is the target dialect."""
-        return self.sqlalchemy_database_uri.startswith("sqlite")
+        try:
+            return self.sqlalchemy_database_uri.startswith("sqlite")
+        except Exception:
+            return False
 
     @property
     def active_storage_mode(self) -> str:
@@ -143,6 +149,27 @@ class Settings(BaseSettings):
         if self.DATABASE_URL and self.DATABASE_URL.strip():
             url = self.DATABASE_URL.strip()
 
+            # Strip accidental CLI copy command e.g. "psql 'postgresql://...'"
+            if url.startswith("psql "):
+                url = url[5:].strip()
+
+            # Strip any enclosing quotes, backticks, and trailing semicolons
+            changed = True
+            while changed:
+                changed = False
+                url = url.strip().rstrip(";").strip()
+                if len(url) >= 2:
+                    if url[0] == url[-1] and url[0] in ("'", '"', '`'):
+                        url = url[1:-1].strip()
+                        changed = True
+                    elif url.startswith(r'\"') and url.endswith(r'\"'):
+                        url = url[2:-2].strip()
+                        changed = True
+                    elif url.startswith(r"\'") and url.endswith(r"\'"):
+                        url = url[2:-2].strip()
+                        changed = True
+            url = url.strip().rstrip(";").strip()
+
             # If explicitly pointing to SQLite
             if url.startswith("sqlite"):
                 if self.ENVIRONMENT.lower() == "production":
@@ -154,11 +181,11 @@ class Settings(BaseSettings):
 
             # Normalize URI schemes from cloud providers for psycopg 3
             if url.startswith("postgres://"):
-                url = url.replace("postgres://", "postgresql+psycopg://", 1)
+                url = "postgresql+psycopg://" + url[len("postgres://"):]
             elif url.startswith("postgresql+psycopg2://"):
-                url = url.replace("postgresql+psycopg2://", "postgresql+psycopg://", 1)
+                url = "postgresql+psycopg://" + url[len("postgresql+psycopg2://"):]
             elif url.startswith("postgresql://") and not url.startswith("postgresql+psycopg://"):
-                url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+                url = "postgresql+psycopg://" + url[len("postgresql://"):]
 
             # Ensure SSL mode is active for Neon or remote cloud PostgreSQL endpoints
             is_cloud_host = (

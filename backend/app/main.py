@@ -34,7 +34,10 @@ async def lifespan(app: FastAPI):
                 "Configure DATABASE_URL with your verified Neon PostgreSQL connection string."
             )
     from app.db.init_db import init_db
-    init_db()
+    try:
+        init_db()
+    except Exception as e:
+        logger.error("Database schema initialization encountered an error: %s", e)
     yield
 
 
