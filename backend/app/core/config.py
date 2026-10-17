@@ -34,6 +34,8 @@ class Settings(BaseSettings):
         "http://localhost:5174",
         "http://127.0.0.1:5174",
         "http://[::1]:5173",
+        "https://findit-production.vercel.app",
+        "https://findit-production-40x66glmq-priyanshukaran25-5139.vercel.app",
     ]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -58,6 +60,8 @@ class Settings(BaseSettings):
             "http://localhost:5174",
             "http://127.0.0.1:5174",
             "http://[::1]:5173",
+            "https://findit-production.vercel.app",
+            "https://findit-production-40x66glmq-priyanshukaran25-5139.vercel.app",
         ]
 
 

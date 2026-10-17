@@ -28,3 +28,27 @@ def test_cors_preflight_headers(client: TestClient) -> None:
     response = client.options("/api/v1/items", headers=headers)
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+
+def test_cors_preflight_vercel_production(client: TestClient) -> None:
+    """Verify CORS preflight handling for deployed production Vercel origin."""
+    headers = {
+        "Origin": "https://findit-production.vercel.app",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type,authorization",
+    }
+    response = client.options("/api/v1/auth/register", headers=headers)
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "https://findit-production.vercel.app"
+
+
+def test_cors_preflight_vercel_preview_regex(client: TestClient) -> None:
+    """Verify CORS preflight handling for dynamic preview Vercel origins."""
+    headers = {
+        "Origin": "https://findit-production-40x66glmq-priyanshukaran25-5139.vercel.app",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type,authorization",
+    }
+    response = client.options("/api/v1/auth/register", headers=headers)
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "https://findit-production-40x66glmq-priyanshukaran25-5139.vercel.app"
