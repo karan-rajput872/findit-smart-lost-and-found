@@ -60,7 +60,7 @@ export const App: React.FC = () => {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="admin">
                 <DashboardLayout />
               </ProtectedRoute>
             }

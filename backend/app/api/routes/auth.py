@@ -1,7 +1,7 @@
 """Authentication and user session routes."""
 
 from typing import Dict
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.schemas.user import (
     UserRegister,
@@ -17,6 +17,7 @@ from app.services.user_repository import (
     get_user_repository,
 )
 from app.api.deps import get_current_user
+from app.core.rate_limit import apply_rate_limit, get_client_ip
 
 router = APIRouter()
 
@@ -29,10 +30,19 @@ router = APIRouter()
     description="Create a new participant account with bcrypt password hashing and email uniqueness verification.",
 )
 def register(
+    request: Request,
     user_in: UserRegister,
     user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
 ) -> UserResponse:
     """Register new account."""
+    client_ip = get_client_ip(request)
+    apply_rate_limit(
+        key=f"register:{client_ip}",
+        max_requests=10,
+        window_seconds=60,
+        db=user_repo.db,
+        error_message="Too many registration attempts from this IP address.",
+    )
     return auth_service.register_user(user_in, user_repo)
 
 
@@ -43,10 +53,19 @@ def register(
     description="Validate campus email and password credentials, returning a signed JWT access token.",
 )
 def login(
+    request: Request,
     login_in: UserLogin,
     user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
 ) -> TokenResponse:
     """Log in and retrieve bearer token."""
+    client_ip = get_client_ip(request)
+    apply_rate_limit(
+        key=f"login:{client_ip}",
+        max_requests=15,
+        window_seconds=60,
+        db=user_repo.db,
+        error_message="Too many login attempts from this IP address.",
+    )
     return auth_service.authenticate_user(login_in, user_repo)
 
 
@@ -57,10 +76,19 @@ def login(
     description="Validate cryptographic Google ID token, link or create campus user account, and issue FindIt JWT access token.",
 )
 def google_auth(
+    request: Request,
     payload: GoogleLoginRequest,
     user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
 ) -> TokenResponse:
     """Log in or sign up via Google Identity Services."""
+    client_ip = get_client_ip(request)
+    apply_rate_limit(
+        key=f"google:{client_ip}",
+        max_requests=20,
+        window_seconds=60,
+        db=user_repo.db,
+        error_message="Too many Google authentication attempts from this IP address.",
+    )
     return auth_service.authenticate_google_user(payload.idToken, user_repo)
 
 

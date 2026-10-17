@@ -46,12 +46,21 @@ class UserBase(BaseModel):
 class UserRegister(UserBase):
     """Payload for user account registration."""
 
+    role: Literal["student", "staff", "admin"] = Field("student", description="Campus participant role")
     password: str = Field(..., min_length=8, max_length=128, description="Account password (min 8 characters)")
     confirmPassword: Optional[str] = Field(
         None,
         validation_alias=AliasChoices("confirmPassword", "confirm_password"),
         description="Password confirmation",
     )
+
+    @field_validator("role")
+    @classmethod
+    def prevent_admin_self_assignment(cls, v: str) -> str:
+        """Prevent self-assignment of administrator privileges during registration."""
+        if v.lower() == "admin":
+            raise ValueError("Registration as administrator is prohibited. Campus accounts must be registered as student or staff.")
+        return v.lower()
 
     @field_validator("password")
     @classmethod

@@ -133,6 +133,9 @@ class SqlAlchemyItemRepository:
             query = query.filter(func.lower(Item.campus) == campus.strip().lower())
         if status and status.lower() != "all":
             query = query.filter(func.lower(Item.status) == status.lower())
+        elif status is None:
+            # Exclude recovered/returned/resolved items from default active search
+            query = query.filter(func.lower(Item.status).notin_(["returned", "resolved"]))
         if search_query and search_query.strip():
             term = f"%{search_query.strip().lower()}%"
             query = query.filter(

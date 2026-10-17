@@ -67,7 +67,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     },
     { label: 'AI Matches', path: '/dashboard/ai-matches', icon: Sparkles, badge: 'Prototype' },
     { label: 'Notifications', path: '/dashboard/notifications', icon: Bell, count: effectiveUnread },
-    { label: 'Admin Portal', path: '/admin', icon: ShieldAlert, badge: 'Mod' },
+    ...(user.role === 'admin'
+      ? [{ label: 'Admin Portal', path: '/admin', icon: ShieldAlert, badge: 'Admin' }]
+      : []),
   ];
 
   return (

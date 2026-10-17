@@ -4,6 +4,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import get_current_user
+from app.core.rate_limit import apply_rate_limit
 from app.schemas.user import UserResponse
 from app.schemas.claim import (
     ClaimCreate,
@@ -47,10 +48,18 @@ def submit_claim(
     """Submit an ownership verification claim for a listed item.
 
     Validates that:
+    - Rate limit is respected.
     - The item exists.
     - The claimant is not claiming their own reported item.
     - No active duplicate claim exists from this claimant for the same item.
     """
+    apply_rate_limit(
+        key=f"claim:{current_user.id}",
+        max_requests=15,
+        window_seconds=60,
+        db=claim_repo.db,
+        error_message="Too many claim submissions. Please wait before submitting another claim.",
+    )
     return claim_repo.submit_claim(claim_in, claimant_id=current_user.id)
 
 
@@ -281,7 +290,14 @@ def send_claim_message(
     current_user: UserResponse = Depends(get_current_user),
     message_repo: SqlAlchemyMessageRepository = Depends(get_message_repository),
 ) -> MessageResponse:
-    """Post a new message to the counterpart on an approved claim."""
+    """Post a new message to the counterpart on an approved claim with rate limiting."""
+    apply_rate_limit(
+        key=f"msg:{current_user.id}",
+        max_requests=35,
+        window_seconds=60,
+        db=message_repo.db,
+        error_message="Too many messages sent. Please wait a moment before sending another message.",
+    )
     return message_repo.send_message(
         claim_id=claim_id,
         sender_id=current_user.id,

@@ -99,7 +99,7 @@ class SqlAlchemyUserRepository:
             email=user_in.email.strip().lower(),
             full_name=user_in.fullName,
             campus=user_in.campus,
-            role=user_in.role,
+            role=user_in.role if user_in.role in ("student", "staff") else "student",
             hashed_password=hashed_password,
             avatar_url=user_in.avatarUrl,
             auth_provider="local",

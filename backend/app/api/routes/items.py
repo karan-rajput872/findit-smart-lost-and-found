@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile
 
 from app.core.config import settings
 from app.api.deps import get_current_user, get_optional_current_user
+from app.core.rate_limit import apply_rate_limit, get_client_ip
 from app.schemas.user import UserResponse
 from app.schemas.item import (
     ItemCreate,
@@ -26,6 +27,36 @@ from app.services.item_repository import (
 router = APIRouter()
 
 
+def validate_image_magic_bytes(contents: bytes) -> str:
+    """Validate true file type based on binary signature (magic bytes).
+
+    Returns detected format ('jpeg', 'png', 'webp', or 'gif').
+    Raises HTTPException(400) if content header is invalid.
+    """
+    if len(contents) < 12:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File content is too small or corrupted to be a valid image.",
+        )
+    # JPEG (\xFF\xD8\xFF)
+    if contents[:3] == b"\xff\xd8\xff":
+        return "jpeg"
+    # PNG (\x89PNG\r\n\x1a\n)
+    if contents[:8] == b"\x89PNG\r\n\x1a\n":
+        return "png"
+    # GIF (GIF87a or GIF89a)
+    if contents[:6] in (b"GIF87a", b"GIF89a"):
+        return "gif"
+    # WEBP (RIFF....WEBP)
+    if contents[:4] == b"RIFF" and contents[8:12] == b"WEBP":
+        return "webp"
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Invalid file content: The file binary header does not match an allowed image format (PNG, JPEG, WEBP, GIF).",
+    )
+
+
 @router.get(
     "",
     response_model=ItemListResponse,
@@ -40,6 +71,7 @@ def list_items(
     q: Optional[str] = Query(None, description="Free-text search query across title, description, and location"),
     skip: int = Query(0, ge=0, description="Number of items to skip for pagination"),
     limit: int = Query(50, ge=1, le=100, description="Maximum items per page"),
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
     repo: SqlAlchemyItemRepository = Depends(get_item_repository),
 ) -> ItemListResponse:
     """List items with search, filter, and pagination support."""
@@ -52,8 +84,17 @@ def list_items(
         skip=skip,
         limit=limit,
     )
+    # Privacy protection: Redact personal reporterContact on public browse listing
+    is_admin = current_user is not None and current_user.role == "admin"
+    sanitized_items = []
+    for item in items:
+        if is_admin or (current_user and item.userId and item.userId == current_user.id):
+            sanitized_items.append(item)
+        else:
+            sanitized_items.append(item.model_copy(update={"reporterContact": None}))
+
     return ItemListResponse(
-        items=items,
+        items=sanitized_items,
         total=total,
         skip=skip,
         limit=limit,
@@ -118,15 +159,24 @@ def get_item_stats(
 )
 def get_item(
     item_id: str,
+    current_user: Optional[UserResponse] = Depends(get_optional_current_user),
     repo: SqlAlchemyItemRepository = Depends(get_item_repository),
 ) -> ItemResponse:
-    """Fetch item by its ID."""
+    """Fetch item by its ID with contact information privacy protection."""
     item = repo.get_by_id(item_id)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Item with ID '{item_id}' not found.",
         )
+
+    # Privacy protection: Redact personal reporterContact unless caller is owner or admin
+    is_owner_or_admin = current_user is not None and (
+        current_user.role == "admin" or (item.userId and item.userId == current_user.id)
+    )
+    if not is_owner_or_admin:
+        item = item.model_copy(update={"reporterContact": None})
+
     return item
 
 
@@ -139,7 +189,15 @@ async def upload_item_image(
     file: UploadFile = File(...),
     current_user: UserResponse = Depends(get_current_user),
 ) -> Dict[str, str]:
-    """Upload and persistently store an item photograph."""
+    """Upload and persistently store an item photograph with validation and rate limiting."""
+    # Apply rate limiting per authenticated user (20 uploads per minute)
+    apply_rate_limit(
+        key=f"upload:{current_user.id}",
+        max_requests=20,
+        window_seconds=60,
+        error_message="Too many image upload attempts. Please wait before uploading another photograph.",
+    )
+
     content_type = (file.content_type or "").lower()
     if content_type not in settings.ALLOWED_IMAGE_TYPES:
         raise HTTPException(
@@ -161,6 +219,9 @@ async def upload_item_image(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File exceeds maximum allowed size of {settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)}MB.",
         )
+
+    # Deep binary content inspection (magic bytes verification)
+    validate_image_magic_bytes(contents)
 
     from app.services.storage_service import upload_image_to_storage
     try:

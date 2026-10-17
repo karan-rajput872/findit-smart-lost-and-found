@@ -5,10 +5,11 @@ import { useApp } from '../../context/AppContext';
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
+  requiredRole?: 'admin' | 'staff' | 'student';
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoadingAuth } = useApp();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
+  const { isAuthenticated, isLoadingAuth, user } = useApp();
   const location = useLocation();
 
   if (isLoadingAuth) {
@@ -22,6 +23,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (requiredRole && user.role !== requiredRole) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children ? <>{children}</> : null;

@@ -45,15 +45,12 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
     try {
       const res = await uploadItemImageApi(file);
       onImageSelected(res.url);
-    } catch {
-      // Fallback to local DataURL preview if server upload fails
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onImageSelected(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to upload photograph to persistent storage. Please try again.';
+      setUploadError(msg);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } finally {
       setIsUploading(false);
     }

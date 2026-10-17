@@ -7,6 +7,7 @@ from app.models.claim import Claim, ClaimStatus
 from app.models.notification import Notification, NotificationType
 from app.models.match import ItemMatch, MatchStatus, MatchFeedback
 from app.models.message import Message
+from app.core.rate_limit import RateLimitEvent
 
 __all__ = [
     "Base",
@@ -22,4 +23,6 @@ __all__ = [
     "MatchStatus",
     "MatchFeedback",
     "Message",
+    "RateLimitEvent",
 ]
+
