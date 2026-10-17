@@ -54,12 +54,21 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
   const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
 
+  const reportError = useCallback(
+    (msg: string) => {
+      if (onError) {
+        onError(msg);
+      } else {
+        setLocalError(msg);
+      }
+    },
+    [onError]
+  );
+
   const handleCredentialResponse = useCallback(
     async (response: { credential: string }) => {
       if (!response.credential) {
-        const msg = 'No credential received from Google.';
-        setLocalError(msg);
-        onError?.(msg);
+        reportError('No credential received from Google.');
         return;
       }
 
@@ -72,13 +81,12 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
           err instanceof Error
             ? err.message
             : 'Google authentication failed. Please try again.';
-        setLocalError(msg);
-        onError?.(msg);
+        reportError(msg);
       } finally {
         setIsProcessing(false);
       }
     },
-    [onSuccess, onError]
+    [onSuccess, reportError]
   );
 
   // Initialize GIS and render official button when available
@@ -134,10 +142,9 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     if (disabled || isProcessing) return;
 
     if (!clientId) {
-      const msg =
-        'Google Client ID is not configured. Please set VITE_GOOGLE_CLIENT_ID in your environment.';
-      setLocalError(msg);
-      onError?.(msg);
+      reportError(
+        'Google Client ID is not configured. Please set VITE_GOOGLE_CLIENT_ID in your environment.'
+      );
       return;
     }
 
@@ -148,7 +155,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
         console.warn('Google prompt error:', err);
       }
     } else {
-      setLocalError('Google Identity Services is loading. Please wait a moment.');
+      reportError('Google Identity Services is loading. Please wait a moment.');
     }
   };
 
