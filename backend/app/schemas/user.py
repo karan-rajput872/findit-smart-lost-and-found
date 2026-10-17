@@ -194,6 +194,11 @@ class UserResponse(UserBase):
         validation_alias=AliasChoices("createdAt", "created_at"),
         description="ISO registration timestamp",
     )
+    authProvider: Optional[str] = Field(
+        "local",
+        validation_alias=AliasChoices("authProvider", "auth_provider"),
+        description="Active authentication provider",
+    )
 
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
@@ -204,6 +209,19 @@ class TokenResponse(BaseModel):
     access_token: str = Field(..., description="Signed JWT bearer token")
     token_type: str = Field("bearer", description="Token scheme")
     user: UserResponse = Field(..., description="Authenticated user profile")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class GoogleLoginRequest(BaseModel):
+    """Payload to authenticate using a Google Identity Services ID token."""
+
+    idToken: str = Field(
+        ...,
+        min_length=10,
+        validation_alias=AliasChoices("idToken", "id_token", "credential"),
+        description="Cryptographic Google ID token issued by Google Identity Services",
+    )
 
     model_config = ConfigDict(populate_by_name=True)
 

@@ -9,6 +9,7 @@ from app.schemas.user import (
     UserResponse,
     TokenResponse,
     UserContactUpdate,
+    GoogleLoginRequest,
 )
 from app.services.auth_service import auth_service
 from app.services.user_repository import (
@@ -47,6 +48,20 @@ def login(
 ) -> TokenResponse:
     """Log in and retrieve bearer token."""
     return auth_service.authenticate_user(login_in, user_repo)
+
+
+@router.post(
+    "/google",
+    response_model=TokenResponse,
+    summary="Authenticate or register using Google Identity Services",
+    description="Validate cryptographic Google ID token, link or create campus user account, and issue FindIt JWT access token.",
+)
+def google_auth(
+    payload: GoogleLoginRequest,
+    user_repo: SqlAlchemyUserRepository = Depends(get_user_repository),
+) -> TokenResponse:
+    """Log in or sign up via Google Identity Services."""
+    return auth_service.authenticate_google_user(payload.idToken, user_repo)
 
 
 @router.get(

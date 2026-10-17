@@ -211,6 +211,10 @@ def run_safe_schema_migrations(engine_instance) -> None:
             user_cols_res = conn.exec_driver_sql("PRAGMA table_info(users)").fetchall()
             user_cols = [row[1] for row in user_cols_res] if user_cols_res else []
             if user_cols:
+                if "google_sub" not in user_cols:
+                    conn.exec_driver_sql("ALTER TABLE users ADD COLUMN google_sub VARCHAR(255)")
+                if "auth_provider" not in user_cols:
+                    conn.exec_driver_sql("ALTER TABLE users ADD COLUMN auth_provider VARCHAR(30) DEFAULT 'local'")
                 if "phone_number" not in user_cols:
                     conn.exec_driver_sql("ALTER TABLE users ADD COLUMN phone_number VARCHAR(30)")
                 if "whatsapp_number" not in user_cols:

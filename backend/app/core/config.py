@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
+    # Google Identity Services Authentication
+    GOOGLE_CLIENT_ID: Optional[str] = None
+
     # Interactive documentation toggling for production
     ENABLE_DOCS: bool = True
 

@@ -82,6 +82,12 @@ class SqlAlchemyUserRepository:
         return self.db.query(User).filter(User.id == identifier.strip()).first()
 
 
+    def get_by_google_sub(self, google_sub: str) -> Optional[User]:
+        """Fetch user by Google subject identifier."""
+        if not google_sub:
+            return None
+        return self.db.query(User).filter(User.google_sub == google_sub.strip()).first()
+
     def create(self, user_in: UserRegister, hashed_password: str) -> User:
         """Persist a new user account."""
         now_ts = int(datetime.utcnow().timestamp())
@@ -96,11 +102,57 @@ class SqlAlchemyUserRepository:
             role=user_in.role,
             hashed_password=hashed_password,
             avatar_url=user_in.avatarUrl,
+            auth_provider="local",
         )
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
         return db_user
+
+    def create_google_user(
+        self,
+        email: str,
+        full_name: str,
+        google_sub: str,
+        avatar_url: Optional[str] = None,
+        campus: str = "Central Campus",
+    ) -> User:
+        """Persist a new user account authenticated via Google."""
+        now_ts = int(datetime.utcnow().timestamp())
+        unique_suffix = uuid.uuid4().hex[:6]
+        new_id = f"usr_{now_ts}_{unique_suffix}"
+
+        db_user = User(
+            id=new_id,
+            email=email.strip().lower(),
+            full_name=full_name.strip() or email.split("@")[0],
+            campus=campus,
+            role="student",  # Lowest-privilege user role per instructions
+            hashed_password=None,
+            google_sub=google_sub.strip(),
+            auth_provider="google",
+            avatar_url=avatar_url,
+        )
+        self.db.add(db_user)
+        self.db.commit()
+        self.db.refresh(db_user)
+        return db_user
+
+    def link_google_account(
+        self,
+        user: User,
+        google_sub: str,
+        avatar_url: Optional[str] = None,
+    ) -> User:
+        """Link an existing email account with a verified Google identity."""
+        user.google_sub = google_sub.strip()
+        if user.auth_provider == "local" or not user.auth_provider:
+            user.auth_provider = "google_and_local"
+        if avatar_url and not user.avatar_url:
+            user.avatar_url = avatar_url
+        self.db.commit()
+        self.db.refresh(user)
+        return user
 
     def update_contact(
         self,

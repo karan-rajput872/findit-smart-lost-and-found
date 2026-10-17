@@ -11,6 +11,7 @@ import {
   deleteItemApi,
   registerApi,
   loginApi,
+  loginWithGoogleApi,
   fetchCurrentUserApi,
   logoutApi,
   getStoredToken,
@@ -72,6 +73,7 @@ interface AppContextType {
   fetchReceivedClaims: (status?: string) => Promise<void>;
   fetchNotifications: () => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   addItem: (newItem: Omit<Item, 'id' | 'createdAt' | 'status' | 'isDemo'>) => Promise<string>;
@@ -392,6 +394,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await refreshBackendData();
   };
 
+  const loginWithGoogle = async (idToken: string): Promise<void> => {
+    const authData = await loginWithGoogleApi(idToken);
+    setUser(authData.user);
+    setIsAuthenticated(true);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authData.user));
+    await refreshBackendData();
+  };
+
   const register = async (payload: RegisterPayload): Promise<void> => {
     await registerApi(payload);
     await login({
@@ -647,6 +657,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         fetchReceivedClaims,
         fetchNotifications,
         login,
+        loginWithGoogle,
         register,
         logout,
         addItem,

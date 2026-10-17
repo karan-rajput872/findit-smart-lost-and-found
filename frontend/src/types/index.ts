@@ -68,6 +68,7 @@ export interface User {
   whatsappNumber?: string;
   whatsappSameAsPhone?: boolean;
   preferredContactMethod?: 'findit_chat' | 'whatsapp' | 'phone_call';
+  authProvider?: 'local' | 'google' | 'google_and_local';
 }
 
 export type ClaimStatus =

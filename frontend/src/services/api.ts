@@ -288,6 +288,45 @@ export async function loginApi(payload: LoginPayload): Promise<AuthTokenResponse
 }
 
 /**
+ * Authenticate with Google Identity Services cryptographic ID token.
+ */
+export async function loginWithGoogleApi(idToken: string): Promise<AuthTokenResponse> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ idToken }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      let msg = errBody.detail || `Google authentication failed with status ${response.status}`;
+      if (Array.isArray(errBody.detail)) {
+        msg = errBody.detail.map((d: { msg?: string }) => d.msg).join(', ');
+      }
+      throw new Error(msg);
+    }
+
+    const data: AuthTokenResponse = await response.json();
+    if (data.access_token) {
+      setStoredToken(data.access_token);
+    }
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw handleNetworkError(err);
+  }
+}
+
+/**
  * Fetch the currently authenticated user profile using the stored Bearer token.
  */
 export async function fetchCurrentUserApi(): Promise<User> {

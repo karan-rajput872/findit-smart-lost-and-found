@@ -22,7 +22,9 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(50), primary_key=True, index=True)
     full_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    hashed_password: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    google_sub: Mapped[Optional[str]] = mapped_column(String(255), unique=True, index=True, nullable=True)
+    auth_provider: Mapped[str] = mapped_column(String(30), default="local", nullable=False)
     campus: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     role: Mapped[str] = mapped_column(String(20), default="student", nullable=False)  # student, staff, admin
     avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
@@ -89,6 +91,7 @@ class User(Base):
             whatsappNumber=self.whatsapp_number,
             whatsappSameAsPhone=bool(self.whatsapp_same_as_phone),
             preferredContactMethod=self.preferred_contact_method or "findit_chat",
+            authProvider=self.auth_provider or "local",
             createdAt=created_iso,
         )
 

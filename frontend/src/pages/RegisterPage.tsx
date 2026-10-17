@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Building, UserPlus, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { FormInput } from '../components/common/FormInput';
 import { BrandLogo } from '../components/common/BrandLogo';
+import { GoogleSignInButton } from '../components/auth/GoogleSignInButton';
 import { CAMPUSES } from '../data/mockData';
 import { useApp } from '../context/AppContext';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register, isAuthenticated } = useApp();
+  const { register, loginWithGoogle, isAuthenticated } = useApp();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -112,7 +113,28 @@ export const RegisterPage: React.FC = () => {
           </div>
         )}
 
-        <div className="p-7 rounded-2xl bg-findit-card border border-findit-border shadow-xl">
+        <div className="p-7 rounded-2xl bg-findit-card border border-findit-border shadow-xl space-y-6">
+          {/* Prominent Google Sign-Up / Continue */}
+          <div className="space-y-4">
+            <GoogleSignInButton
+              buttonText="Continue with Google"
+              onSuccess={async (idToken) => {
+                setApiError(null);
+                await loginWithGoogle(idToken);
+                navigate('/dashboard', { replace: true });
+              }}
+              onError={(err) => setApiError(err)}
+            />
+
+            {/* Visual Separator */}
+            <div className="relative flex items-center justify-center py-1">
+              <div className="w-full border-t border-findit-border" />
+              <span className="absolute px-3 text-[11px] font-bold uppercase tracking-wider bg-findit-card text-findit-muted">
+                OR
+              </span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <FormInput
               label="Full Name"
