@@ -102,8 +102,8 @@ export function getAvatarFallback(name: string = 'User'): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
     <linearGradient id="avatarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366F1" />
-      <stop offset="100%" stop-color="#A855F7" />
+      <stop offset="0%" stop-color="#6F8B74" />
+      <stop offset="100%" stop-color="#5A735E" />
     </linearGradient>
   </defs>
   <rect width="100%" height="100%" rx="64" fill="url(#avatarGrad)" />

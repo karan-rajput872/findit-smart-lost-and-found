@@ -148,8 +148,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {/* User Card & Logout Footer */}
         <div className="p-3 border-t border-findit-border bg-white/50 space-y-2">
           <div className="flex items-center gap-3 p-2 rounded-xl bg-white border border-findit-border shadow-subtle">
-            <div className="w-9 h-9 rounded-full bg-findit-primary/15 text-findit-primary font-bold text-xs flex items-center justify-center shrink-0 border border-findit-primary/25">
-              {getAvatarFallback(user.fullName)}
+            <div className="w-9 h-9 rounded-full bg-findit-primary/15 text-findit-primary font-bold text-xs flex items-center justify-center shrink-0 border border-findit-primary/25 overflow-hidden">
+              <img
+                src={getAvatarFallback(user.fullName)}
+                alt={user.fullName || 'User'}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-xs font-bold text-findit-text truncate">{user.fullName}</p>

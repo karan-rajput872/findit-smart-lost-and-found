@@ -233,8 +233,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
 
         {/* User Pill */}
         <div className="flex items-center gap-2 pl-1 border-l border-findit-border">
-          <div className="w-8 h-8 rounded-full bg-findit-primary/15 text-findit-primary font-bold text-xs flex items-center justify-center border border-findit-primary/30 shrink-0">
-            {getAvatarFallback(user.fullName)}
+          <div className="w-8 h-8 rounded-full bg-findit-primary/15 text-findit-primary font-bold text-xs flex items-center justify-center border border-findit-primary/30 shrink-0 overflow-hidden">
+            <img
+              src={getAvatarFallback(user.fullName)}
+              alt={user.fullName || 'User'}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="hidden sm:block text-left">
             <p className="text-xs font-bold text-findit-text leading-tight truncate max-w-[120px]">
