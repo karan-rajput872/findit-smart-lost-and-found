@@ -20,6 +20,9 @@ def _sanitize_db_error_message(message: str) -> str:
     import re
     sanitized = re.sub(r"://([^:/@]+):([^@]+)@", r"://\1:***@", str(message))
     sanitized = re.sub(r"(password=)[^&;\s]+", r"\1***", sanitized, flags=re.IGNORECASE)
+    sanitized = re.sub(r"(token=)[^&;\s]+", r"\1***", sanitized, flags=re.IGNORECASE)
+    sanitized = re.sub(r"(secret=)[^&;\s]+", r"\1***", sanitized, flags=re.IGNORECASE)
+    sanitized = re.sub(r"password\s+['\"][^'\"]+['\"]", "password '***'", sanitized, flags=re.IGNORECASE)
     return sanitized
 
 
