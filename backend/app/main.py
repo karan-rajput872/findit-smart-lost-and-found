@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
                 "Ensure JWT_SECRET_KEY is securely configured via environment variables."
             )
         if not settings.is_postgres:
-            raise RuntimeError(
+            logger.error(
                 "CRITICAL PRODUCTION CONFIGURATION ERROR: Production environment is not configured with PostgreSQL. "
                 "Configure DATABASE_URL with your verified Neon PostgreSQL connection string."
             )

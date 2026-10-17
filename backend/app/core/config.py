@@ -147,19 +147,20 @@ class Settings(BaseSettings):
         driver to psycopg (v3) and enforces required SSL modes.
         """
         if self.DATABASE_URL and self.DATABASE_URL.strip():
+            import re
             url = self.DATABASE_URL.strip()
 
-            # Strip accidental CLI copy command e.g. "psql 'postgresql://...'"
-            if url.startswith("psql "):
-                url = url[5:].strip()
+            # Strip assignment prefixes and psql CLI command
+            url = re.sub(r'^(export\s+)?(DATABASE_URL|DATABASE_URI)\s*=\s*', '', url, flags=re.IGNORECASE)
+            url = re.sub(r'^psql\s+', '', url, flags=re.IGNORECASE)
 
-            # Strip any enclosing quotes, backticks, and trailing semicolons
+            # Strip enclosing quotes, brackets, parens
             changed = True
             while changed:
                 changed = False
                 url = url.strip().rstrip(";").strip()
                 if len(url) >= 2:
-                    if url[0] == url[-1] and url[0] in ("'", '"', '`'):
+                    if (url[0] == url[-1] and url[0] in ("'", '"', '`')) or (url[0] == '(' and url[-1] == ')') or (url[0] == '<' and url[-1] == '>'):
                         url = url[1:-1].strip()
                         changed = True
                     elif url.startswith(r'\"') and url.endswith(r'\"'):
@@ -168,7 +169,13 @@ class Settings(BaseSettings):
                     elif url.startswith(r"\'") and url.endswith(r"\'"):
                         url = url[2:-2].strip()
                         changed = True
-            url = url.strip().rstrip(";").strip()
+
+            # If there is a postgres URI embedded inside, extract it cleanly
+            pg_match = re.search(r'(postgres(?:ql)?(?:\+[a-zA-Z0-9_]+)?://[^\s"\'<>]+)', url)
+            if pg_match:
+                url = pg_match.group(1)
+
+            url = url.strip().rstrip(";").strip().rstrip('"\'')
 
             # If explicitly pointing to SQLite
             if url.startswith("sqlite"):

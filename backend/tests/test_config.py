@@ -118,9 +118,13 @@ def test_database_url_quoted_and_prefixed_sanitization() -> None:
     test_inputs = [
         "'postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb'",
         '"postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb"',
+        "DATABASE_URL=postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb",
+        'DATABASE_URL="postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb"',
+        "export DATABASE_URL='postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb'",
         "psql 'postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb?sslmode=require'",
         "  '  postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb  '  ",
         "'postgres://user:pass@ep-test.us-east-2.aws.neon.tech/neondb';",
+        "<postgresql://user:pass@ep-test.us-east-2.aws.neon.tech/neondb>",
     ]
 
     for raw in test_inputs:
