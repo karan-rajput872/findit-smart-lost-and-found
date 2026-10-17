@@ -25,6 +25,16 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # Safe precondition check: prevent downgrade if Google-only accounts exist with NULL hashed_password
+    conn = op.get_bind()
+    null_count = conn.execute(sa.text("SELECT COUNT(*) FROM users WHERE hashed_password IS NULL")).scalar()
+    if null_count and null_count > 0:
+        raise RuntimeError(
+            f"Cannot safely downgrade migration '20261017_01': {null_count} user account(s) have NULL hashed_password. "
+            "Reverting column to NOT NULL would violate database integrity constraints. "
+            "Resolve or assign fallback credentials before downgrading."
+        )
+
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.drop_index(op.f('ix_users_google_sub'))
         batch_op.alter_column('hashed_password', existing_type=sa.String(length=255), nullable=False)
