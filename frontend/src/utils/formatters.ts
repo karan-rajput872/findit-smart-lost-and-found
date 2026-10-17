@@ -35,13 +35,13 @@ export function formatTimeAgo(dateString: string): string {
 export function getStatusLabel(status: ItemStatus): string {
   switch (status) {
     case 'open':
-      return 'Active Listing';
+      return 'Active';
     case 'pending_verification':
-      return 'Claim Pending';
+      return 'Under Review';
     case 'claimed':
-      return 'Claimed';
+      return 'Claim Approved';
     case 'resolved':
-      return 'Reunited / Resolved';
+      return 'Successfully Returned';
     default:
       return status;
   }
@@ -50,26 +50,26 @@ export function getStatusLabel(status: ItemStatus): string {
 export function getCategoryBadgeColor(category: ItemCategory): string {
   switch (category) {
     case 'Electronics':
-      return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+      return 'text-[#4A6478] bg-[#EBF1F5] border-[#D4E0E8]';
     case 'Wallets & Bags':
-      return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
+      return 'text-[#6F5B78] bg-[#F3ECF5] border-[#E4D8E7]';
     case 'Keys':
-      return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+      return 'text-[#876536] bg-[#F7EEDF] border-[#EADECA]';
     case 'IDs & Cards':
-      return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      return 'text-[#3E6B4A] bg-[#E5EFE6] border-[#CEE0D0]';
     case 'Clothing & Accessories':
-      return 'text-pink-400 bg-pink-500/10 border-pink-500/20';
+      return 'text-[#825463] bg-[#F7ECF0] border-[#EAD6DE]';
     case 'Books & Stationery':
-      return 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20';
+      return 'text-[#486D6B] bg-[#EAF2F1] border-[#D3E3E1]';
     case 'Jewelry & Watches':
-      return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
+      return 'text-[#7D6B37] bg-[#F6F1DF] border-[#E7DEBE]';
     default:
-      return 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+      return 'text-[#616B64] bg-[#EEF2EF] border-[#DCE3DD]';
   }
 }
 
 export function getTypeBadgeColor(type: ItemType): string {
   return type === 'lost'
-    ? 'text-red-400 bg-red-500/10 border-red-500/20'
-    : 'text-teal-300 bg-teal-500/10 border-teal-500/20';
+    ? 'text-[#A84A42] bg-[#F6E5E2] border-[#EAD2CE]'
+    : 'text-[#3E6B4A] bg-[#E5EFE6] border-[#CEE0D0]';
 }

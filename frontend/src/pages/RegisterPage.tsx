@@ -84,37 +84,37 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-2">
           <BrandLogo size="lg" className="justify-center" />
-          <h2 className="text-2xl font-bold tracking-tight text-white pt-2">
-            Create your FindIt Account
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-findit-text pt-2">
+            Create your Account
           </h2>
-          <p className="text-xs text-findit-muted">
-            Connect to your campus network to report and recover misplaced belongings
+          <p className="text-xs sm:text-sm text-findit-muted">
+            Join your campus community to report and recover lost belongings
           </p>
         </div>
 
         {apiError && (
-          <div className="p-3.5 rounded-xl bg-findit-danger/10 border border-findit-danger/30 text-xs text-findit-danger flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-findit-danger-bg border border-findit-border text-xs text-findit-danger flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{apiError}</span>
           </div>
         )}
 
         {successNotice && (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2.5 animate-in fade-in">
-            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+          <div className="p-4 rounded-xl bg-findit-found-bg border border-[#CEE0D0] text-xs text-[#2D593A] flex items-center gap-2.5 animate-in fade-in">
+            <CheckCircle2 className="w-5 h-5 shrink-0 text-[#4E7A5A]" />
             <div>
               <p className="font-bold">Account created successfully!</p>
-              <p className="text-emerald-400/80">Signing you in and opening your dashboard...</p>
+              <p className="text-[#3E6B4A]">Opening your dashboard...</p>
             </div>
           </div>
         )}
 
-        <div className="p-7 rounded-2xl bg-findit-card border border-findit-border shadow-xl space-y-6">
-          {/* Prominent Google Sign-Up / Continue */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-findit-border shadow-card space-y-6">
+          {/* Prominent Google Sign-Up */}
           <div className="space-y-4">
             <GoogleSignInButton
               buttonText="Continue with Google"
@@ -129,7 +129,7 @@ export const RegisterPage: React.FC = () => {
             {/* Visual Separator */}
             <div className="relative flex items-center justify-center py-1">
               <div className="w-full border-t border-findit-border" />
-              <span className="absolute px-3 text-[11px] font-bold uppercase tracking-wider bg-findit-card text-findit-muted">
+              <span className="absolute px-3 text-[11px] font-bold uppercase tracking-wider bg-white text-findit-muted">
                 OR
               </span>
             </div>
@@ -137,7 +137,7 @@ export const RegisterPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <FormInput
-              label="Full Name"
+              label="Full Name *"
               icon={User}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -147,7 +147,7 @@ export const RegisterPage: React.FC = () => {
             />
 
             <FormInput
-              label="Campus Email Address"
+              label="Campus Email Address *"
               type="email"
               icon={Mail}
               value={email}
@@ -160,7 +160,7 @@ export const RegisterPage: React.FC = () => {
             {/* Campus Selection */}
             <div className="space-y-1.5 text-left">
               <label className="block text-xs font-semibold uppercase tracking-wider text-findit-muted">
-                Campus or Institution
+                Campus or Institution *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-findit-muted">
@@ -169,7 +169,7 @@ export const RegisterPage: React.FC = () => {
                 <select
                   value={campus}
                   onChange={(e) => setCampus(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-findit-card border border-findit-border text-sm text-findit-text focus:border-findit-primary focus:ring-1 focus:ring-findit-primary outline-none"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-findit-border text-sm text-findit-text focus:border-findit-primary focus:ring-1 focus:ring-findit-primary outline-none min-h-[42px]"
                 >
                   {CAMPUSES.map((c) => (
                     <option key={c} value={c}>
@@ -182,7 +182,7 @@ export const RegisterPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormInput
-                label="Password"
+                label="Password *"
                 isPassword
                 icon={Lock}
                 value={password}
@@ -193,7 +193,7 @@ export const RegisterPage: React.FC = () => {
               />
 
               <FormInput
-                label="Confirm Password"
+                label="Confirm Password *"
                 isPassword
                 icon={Lock}
                 value={confirmPassword}
@@ -211,10 +211,10 @@ export const RegisterPage: React.FC = () => {
                   type="checkbox"
                   checked={acceptTerms}
                   onChange={(e) => setAcceptTerms(e.target.checked)}
-                  className="mt-0.5 rounded border-findit-border bg-findit-bg text-findit-primary focus:ring-0"
+                  className="mt-0.5 rounded border-findit-border text-findit-primary focus:ring-0"
                 />
                 <span>
-                  I agree to the <span className="text-findit-text underline">FindIt Campus Community Guidelines</span> and consent to verify ownership before claiming items.
+                  I agree to the <span className="text-findit-text underline font-semibold">Community Guidelines</span> and consent to verify ownership before claiming items.
                 </span>
               </label>
               {errors.terms && (
@@ -228,7 +228,7 @@ export const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white bg-findit-primary hover:bg-findit-primary-hover disabled:opacity-50 shadow-glow-primary transition-all duration-150"
+              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white bg-findit-primary hover:bg-findit-primary-hover disabled:opacity-50 shadow-subtle transition-all duration-150 min-h-[44px]"
             >
               {isSubmitting ? (
                 <>
@@ -244,10 +244,10 @@ export const RegisterPage: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-findit-border/60 text-center text-xs text-findit-muted">
-            Already registered on FindIt?{' '}
-            <Link to="/login" className="font-semibold text-findit-primary hover:underline">
-              Sign in to your account
+          <div className="mt-6 pt-5 border-t border-findit-border text-center text-xs text-findit-muted">
+            Already have an account?{' '}
+            <Link to="/login" className="font-bold text-findit-primary hover:underline">
+              Sign in
             </Link>
           </div>
         </div>

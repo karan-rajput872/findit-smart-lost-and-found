@@ -37,9 +37,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
   const getBorderColor = () => {
     if (isUnread) {
-      return 'border-findit-primary/40 bg-findit-card shadow-sm';
+      return 'border-findit-primary/40 bg-white shadow-subtle';
     }
-    return 'border-findit-border/60 bg-findit-card/50';
+    return 'border-findit-border bg-white/70';
   };
 
   const timeStr = notification.createdAt || notification.timestamp || '';
@@ -49,7 +49,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     <div
       className={`p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 ${getBorderColor()}`}
     >
-      <div className="p-2.5 rounded-xl bg-findit-bg border border-findit-border/80 shrink-0 mt-0.5">
+      <div className="p-2.5 rounded-xl bg-findit-bg border border-findit-border shrink-0 mt-0.5">
         {getIcon()}
       </div>
 
@@ -57,8 +57,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         <div className="flex items-center justify-between gap-2 mb-1">
           <div className="flex items-center gap-2">
             <h4
-              className={`text-sm font-bold truncate ${
-                isUnread ? 'text-white' : 'text-findit-text'
+              className={`text-sm truncate text-findit-text ${
+                isUnread ? 'font-bold' : 'font-semibold'
               }`}
             >
               {notification.title}
@@ -67,7 +67,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               <span className="w-2 h-2 rounded-full bg-findit-primary shrink-0" />
             )}
           </div>
-          <span className="text-[11px] text-findit-subtle shrink-0">
+          <span className="text-[11px] text-findit-muted shrink-0">
             {displayTime}
           </span>
         </div>
@@ -77,7 +77,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         </p>
 
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-findit-border/40 text-xs">
-          <span className="text-[10px] uppercase font-semibold tracking-wider text-findit-subtle">
+          <span className="text-[10px] uppercase font-semibold tracking-wider text-findit-muted">
             {(notification.notificationType || notification.type || 'SYSTEM').replace('_', ' ')}
           </span>
 
@@ -86,9 +86,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               <button
                 type="button"
                 onClick={() => onMarkAsRead(notification.id)}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-findit-muted hover:text-white transition-colors"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-findit-muted hover:text-findit-text transition-colors min-h-[36px] px-2"
               >
-                <Check className="w-3 h-3" />
+                <Check className="w-3 h-3 text-findit-primary" />
                 <span>Mark read</span>
               </button>
             )}

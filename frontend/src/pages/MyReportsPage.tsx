@@ -174,7 +174,7 @@ export const MyReportsPage: React.FC = () => {
           </div>
           <button
             onClick={() => setActionMessage(null)}
-            className="text-findit-muted hover:text-white px-1 font-bold"
+            className="text-findit-muted hover:text-findit-text px-1 font-bold"
           >
             ✕
           </button>
@@ -193,7 +193,7 @@ export const MyReportsPage: React.FC = () => {
               className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
                 typeFilter === t
                   ? 'bg-findit-primary text-white shadow-sm'
-                  : 'bg-findit-bg text-findit-muted hover:text-white border border-findit-border'
+                  : 'bg-findit-bg text-findit-muted hover:text-findit-text border border-findit-border'
               }`}
             >
               {t}
@@ -253,7 +253,7 @@ export const MyReportsPage: React.FC = () => {
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="p-5 rounded-2xl bg-findit-card border border-findit-border flex flex-col md:flex-row md:items-center justify-between gap-5 card-hover transition-all"
+              className="p-5 rounded-2xl bg-white border border-findit-border shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-5 card-hover transition-all"
             >
               {/* Item Thumbnail & Basic Info */}
               <div className="flex items-start gap-4 flex-1">
@@ -269,17 +269,17 @@ export const MyReportsPage: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge type={item.type} size="sm" />
                     <StatusBadge status={item.status} size="sm" />
-                    <span className="text-[11px] text-findit-subtle font-medium">
+                    <span className="text-[11px] text-findit-muted font-medium">
                       Category: {item.category}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white truncate">{item.title}</h3>
+                  <h3 className="text-base font-bold text-findit-text truncate">{item.title}</h3>
                   <p className="text-xs text-findit-muted line-clamp-1">{item.description}</p>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-findit-subtle pt-1">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-findit-muted pt-1">
                     <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-findit-secondary shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-findit-primary shrink-0" />
                       {item.location}
                     </span>
                     <span className="flex items-center gap-1.5">
@@ -294,25 +294,25 @@ export const MyReportsPage: React.FC = () => {
               <div className="flex items-center gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-findit-border/60">
                 <Link
                   to={`/dashboard/items/${item.id}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-findit-bg hover:bg-findit-card-hover border border-findit-border text-findit-text transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-white hover:bg-findit-bg border border-findit-border text-findit-text transition-colors"
                 >
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-3.5 h-3.5 text-findit-primary" />
                   <span>View Details</span>
                 </Link>
 
                 <button
                   type="button"
                   onClick={() => handleOpenEdit(item)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-findit-primary/15 hover:bg-findit-primary/25 border border-findit-primary/30 text-findit-primary transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-findit-primary/15 hover:bg-findit-primary/25 border border-findit-primary/30 text-findit-text transition-colors"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
+                  <Edit3 className="w-3.5 h-3.5 text-findit-primary" />
                   <span>Edit Listing</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmId(item.id)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-[#F6E5E2] hover:bg-[#F2D7D3] border border-[#ECD1CC] text-[#A84A42] transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete</span>
@@ -336,18 +336,18 @@ export const MyReportsPage: React.FC = () => {
 
       {/* Comprehensive Edit Listing Modal */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-lg p-6 sm:p-7 rounded-2xl bg-findit-card border border-findit-border shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-lg p-6 sm:p-7 rounded-2xl bg-white border border-findit-border shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-findit-primary">
                   Owner Edit Mode
                 </span>
-                <h3 className="text-lg font-bold text-white mt-0.5">Edit Item Listing</h3>
+                <h3 className="text-lg font-bold text-findit-text mt-0.5">Edit Item Listing</h3>
               </div>
               <button
                 onClick={() => setEditingItem(null)}
-                className="text-findit-muted hover:text-white p-1"
+                className="text-findit-muted hover:text-findit-text p-1 min-h-[36px] min-w-[36px] flex items-center justify-center"
               >
                 ✕
               </button>
@@ -363,7 +363,7 @@ export const MyReportsPage: React.FC = () => {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-findit-bg border border-findit-border text-sm text-findit-text focus:border-findit-primary outline-none"
+                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-white border border-findit-border text-sm text-findit-text focus:border-findit-primary outline-none"
                   required
                 />
               </div>
@@ -377,7 +377,7 @@ export const MyReportsPage: React.FC = () => {
                   type="text"
                   value={editLocation}
                   onChange={(e) => setEditLocation(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-findit-bg border border-findit-border text-sm text-findit-text focus:border-findit-primary outline-none"
+                  className="w-full px-4 py-2.5 min-h-[44px] rounded-xl bg-white border border-findit-border text-sm text-findit-text focus:border-findit-primary outline-none"
                   required
                 />
               </div>
@@ -391,7 +391,7 @@ export const MyReportsPage: React.FC = () => {
                   rows={3}
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-findit-bg border border-findit-border text-sm text-findit-text focus:border-findit-primary outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white border border-findit-border text-sm text-findit-text focus:border-findit-primary outline-none"
                   required
                 />
               </div>
@@ -412,10 +412,10 @@ export const MyReportsPage: React.FC = () => {
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer text-xs transition-colors ${
+                      className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer text-xs transition-colors min-h-[44px] ${
                         editStatus === option.value
-                          ? 'bg-findit-primary/15 border-findit-primary text-white font-semibold'
-                          : 'bg-findit-bg border-findit-border text-findit-muted hover:border-findit-border-light'
+                          ? 'bg-findit-primary/15 border-findit-primary text-findit-text font-semibold'
+                          : 'bg-white border-findit-border text-findit-muted hover:border-findit-border'
                       }`}
                     >
                       <input
@@ -424,7 +424,7 @@ export const MyReportsPage: React.FC = () => {
                         value={option.value}
                         checked={editStatus === option.value}
                         onChange={() => setEditStatus(option.value as ItemStatus)}
-                        className="text-findit-primary"
+                        className="text-findit-primary accent-findit-primary"
                       />
                       <span>{option.label}</span>
                     </label>
@@ -433,19 +433,19 @@ export const MyReportsPage: React.FC = () => {
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-findit-border/60">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-findit-border">
                 <button
                   type="button"
                   onClick={() => setEditingItem(null)}
                   disabled={isSavingEdit}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-findit-border text-findit-muted hover:text-white"
+                  className="px-4 py-2.5 min-h-[44px] text-xs font-semibold rounded-xl border border-findit-border text-findit-muted hover:text-findit-text hover:bg-findit-bg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingEdit}
-                  className="px-5 py-2 text-xs font-bold rounded-xl text-white bg-findit-primary hover:bg-findit-primary-hover shadow-glow-primary transition-all disabled:opacity-50"
+                  className="px-5 py-2.5 min-h-[44px] text-xs font-bold rounded-xl text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all disabled:opacity-50"
                 >
                   {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
                 </button>

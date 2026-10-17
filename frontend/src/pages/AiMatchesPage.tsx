@@ -205,8 +205,8 @@ export const AiMatchesPage: React.FC = () => {
     <div className="space-y-8">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl bg-findit-primary text-black font-bold shadow-2xl flex items-center gap-3 animate-fade-in border border-white/20">
-          <Sparkles className="w-5 h-5 text-black shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl bg-findit-primary text-white font-bold shadow-2xl flex items-center gap-3 animate-fade-in border border-white/20">
+          <Sparkles className="w-5 h-5 text-white shrink-0" />
           <span className="text-sm">{toastMessage.text}</span>
         </div>
       )}
@@ -214,17 +214,17 @@ export const AiMatchesPage: React.FC = () => {
       {/* Feedback Modal with optional notes */}
       {activeFeedbackModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-findit-card border border-findit-border shadow-2xl space-y-4">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-white border border-findit-border shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-findit-border">
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-findit-primary" />
-                <h3 className="text-sm font-bold text-white capitalize">
+                <h3 className="text-sm font-bold text-findit-text capitalize">
                   Record Feedback: {activeFeedbackModal.feedbackType.replace('_', ' ')}
                 </h3>
               </div>
               <button
                 onClick={() => setActiveFeedbackModal(null)}
-                className="p-1 rounded-lg hover:bg-findit-bg text-findit-muted hover:text-white"
+                className="p-1 rounded-lg hover:bg-findit-bg text-findit-muted hover:text-findit-text"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -232,7 +232,7 @@ export const AiMatchesPage: React.FC = () => {
 
             <p className="text-xs text-findit-muted">
               Optional: Add a brief remark explaining why this recommendation is{' '}
-              <strong>{activeFeedbackModal.feedbackType.replace('_', ' ')}</strong>. This helps tune our scoring model.
+              <strong>{activeFeedbackModal.feedbackType.replace('_', ' ')}</strong>. This helps tune our suggestions.
             </p>
 
             <textarea
@@ -240,13 +240,13 @@ export const AiMatchesPage: React.FC = () => {
               placeholder="e.g. Color and model matched perfectly, but serial number was different..."
               value={feedbackNotes}
               onChange={(e) => setFeedbackNotes(e.target.value)}
-              className="w-full p-3 rounded-xl bg-findit-bg border border-findit-border text-xs text-white placeholder-findit-muted focus:outline-none focus:border-findit-primary"
+              className="w-full p-3 rounded-xl bg-white border border-findit-border text-xs text-findit-text placeholder-findit-muted focus:outline-none focus:border-findit-primary"
             />
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setActiveFeedbackModal(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-findit-muted hover:text-white"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-findit-muted hover:text-findit-text"
               >
                 Cancel
               </button>
@@ -258,7 +258,7 @@ export const AiMatchesPage: React.FC = () => {
                     feedbackNotes.trim() || undefined
                   )
                 }
-                className="px-4 py-2 rounded-xl bg-findit-primary text-black font-bold text-xs hover:bg-findit-primary-hover transition-colors"
+                className="px-5 py-2.5 min-h-[44px] rounded-xl bg-findit-primary text-white font-bold text-xs hover:bg-findit-primary-hover shadow-subtle transition-colors"
               >
                 Submit Feedback
               </button>
@@ -269,91 +269,91 @@ export const AiMatchesPage: React.FC = () => {
 
       {/* Header with Scan Action */}
       <PageHeader
-        title="AI-Powered Smart Matching"
-        description="Continuous multi-signal semantic matching between active lost belongings and turned-in campus items."
+        title="Smart Suggestions & Matches"
+        description="Helpful suggestions matching lost belongings with recently found items across campus."
         badge={
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-findit-primary/15 text-findit-primary border border-findit-primary/30 flex items-center gap-1.5">
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#E5EFE6] text-[#3E6B4A] border border-[#CDE1CE] flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            Active AI Engine
+            Active Smart Matching
           </span>
         }
         action={
           <button
             onClick={handleScan}
             disabled={isScanning || isLoadingMatches}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-findit-primary hover:bg-findit-primary-hover text-black font-bold text-xs shadow-lg shadow-findit-primary/20 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-findit-primary hover:bg-findit-primary-hover text-white font-bold text-xs shadow-subtle transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
-            {isScanning ? 'Scanning Directory...' : 'Recalculate Matches'}
+            {isScanning ? 'Checking Directory...' : 'Refresh Suggestions'}
           </button>
         }
       />
 
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-findit-card border border-findit-border shadow-sm space-y-1">
-          <div className="text-xs text-findit-muted font-medium">Total Matches</div>
-          <div className="text-2xl font-black text-white">{potentialMatches.length}</div>
-          <div className="text-[11px] text-findit-subtle">Calculated pairs</div>
+        <div className="p-5 rounded-2xl bg-white border border-findit-border shadow-subtle space-y-1">
+          <div className="text-xs text-findit-muted font-medium">Total Suggestions</div>
+          <div className="text-2xl font-black text-findit-text">{potentialMatches.length}</div>
+          <div className="text-[11px] text-findit-muted">Calculated pairs</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-findit-card border border-findit-border shadow-sm space-y-1">
-          <div className="text-xs text-findit-secondary font-medium flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-findit-secondary" />
+        <div className="p-5 rounded-2xl bg-white border border-[#CDE1CE] shadow-subtle space-y-1">
+          <div className="text-xs text-[#3E6B4A] font-medium flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#3E6B4A]" />
             Strong (80%+)
           </div>
-          <div className="text-2xl font-black text-white">
+          <div className="text-2xl font-black text-findit-text">
             {potentialMatches.filter((m) => (m.similarityScore ?? m.overallScore ?? 0) >= 80).length}
           </div>
-          <div className="text-[11px] text-findit-subtle">High confidence</div>
+          <div className="text-[11px] text-findit-muted">High confidence</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-findit-card border border-findit-border shadow-sm space-y-1">
+        <div className="p-5 rounded-2xl bg-white border border-findit-border shadow-subtle space-y-1">
           <div className="text-xs text-findit-primary font-medium">Possible (50-79%)</div>
-          <div className="text-2xl font-black text-white">
+          <div className="text-2xl font-black text-findit-text">
             {potentialMatches.filter((m) => {
               const s = m.similarityScore ?? m.overallScore ?? 0;
               return s >= 50 && s < 80;
             }).length}
           </div>
-          <div className="text-[11px] text-findit-subtle">Moderate similarity</div>
+          <div className="text-[11px] text-findit-muted">Moderate similarity</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-findit-card border border-findit-border shadow-sm space-y-1">
-          <div className="text-xs text-amber-400 font-medium">Pending Feedback</div>
-          <div className="text-2xl font-black text-white">
+        <div className="p-5 rounded-2xl bg-white border border-[#EEDCBE] shadow-subtle space-y-1">
+          <div className="text-xs text-[#8F6325] font-medium">Pending Feedback</div>
+          <div className="text-2xl font-black text-findit-text">
             {potentialMatches.filter((m) => !m.feedback).length}
           </div>
-          <div className="text-[11px] text-findit-subtle">Unreviewed suggestions</div>
+          <div className="text-[11px] text-findit-muted">Unreviewed suggestions</div>
         </div>
       </div>
 
       {/* Explanatory AI Callout */}
-      <div className="p-6 rounded-2xl bg-findit-card/80 border border-findit-border space-y-3 relative overflow-hidden backdrop-blur-sm">
+      <div className="p-6 rounded-2xl bg-white border border-findit-border shadow-subtle space-y-3 relative overflow-hidden">
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-findit-primary/15 text-findit-primary border border-findit-primary/30 shrink-0">
+          <div className="p-3 rounded-xl bg-findit-primary/15 text-findit-primary border border-findit-primary/25 shrink-0">
             <Cpu className="w-6 h-6" />
           </div>
           <div className="space-y-1 flex-1">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              Multi-Signal AI Recommendation Engine
+            <h3 className="text-sm font-bold text-findit-text flex items-center gap-2">
+              How Smart Suggestions Work
             </h3>
             <p className="text-xs text-findit-muted leading-relaxed">
-              FindIt compares reports across five calibrated dimensions: <strong>Semantic Text Similarity</strong> (TF-IDF vector space with campus synonyms and dense embedding fallback), <strong>Structured Attributes</strong> (brand & color detection), <strong>Category compatibility</strong>, <strong>Spatio-Temporal proximity</strong> (campus locations and report dates), and <strong>Visual metadata</strong>.
+              FindIt carefully compares descriptions, item categories, campus locations, and report dates to suggest likely matches between lost belongings and turned-in items.
             </p>
           </div>
         </div>
 
-        <div className="p-3 rounded-xl bg-findit-bg/80 border border-findit-border/60 text-[11px] text-findit-subtle flex items-center gap-2">
-          <Info className="w-4 h-4 text-findit-secondary shrink-0" />
+        <div className="p-3.5 rounded-xl bg-findit-bg border border-findit-border text-[11px] text-findit-muted flex items-center gap-2">
+          <Info className="w-4 h-4 text-findit-primary shrink-0" />
           <span>
-            <strong>Privacy & Security Notice:</strong> AI matching evaluates only public listing headlines, categories, and descriptions. Confidential ownership proof and private verification details are strictly excluded from all matching algorithms.
+            <strong>Privacy Guarantee:</strong> Smart matching only checks public descriptions and locations. Private ownership clues and serial numbers remain confidential and are never shared.
           </span>
         </div>
       </div>
 
       {/* Interactive Filter Bar */}
-      <div className="p-4 rounded-2xl bg-findit-card border border-findit-border space-y-3">
+      <div className="p-4 rounded-2xl bg-white border border-findit-border shadow-subtle space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1">
@@ -363,7 +363,7 @@ export const AiMatchesPage: React.FC = () => {
               placeholder="Search matches by keyword, item title, or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-findit-bg border border-findit-border text-xs text-white placeholder-findit-muted focus:outline-none focus:border-findit-primary transition-colors"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-findit-bg border border-findit-border text-xs text-findit-text placeholder-findit-muted focus:outline-none focus:border-findit-primary transition-colors"
             />
           </div>
 
@@ -427,10 +427,10 @@ export const AiMatchesPage: React.FC = () => {
             <button
               key={tier.id}
               onClick={() => setSelectedTier(tier.id as any)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors min-h-[36px] ${
                 selectedTier === tier.id
-                  ? 'bg-findit-primary text-black'
-                  : 'bg-findit-bg text-findit-muted hover:text-white border border-findit-border'
+                  ? 'bg-findit-primary text-white shadow-subtle'
+                  : 'bg-white text-findit-muted hover:text-findit-text border border-findit-border'
               }`}
             >
               {tier.label}
@@ -441,15 +441,15 @@ export const AiMatchesPage: React.FC = () => {
 
       {/* Match Cards Listing */}
       {isLoadingMatches ? (
-        <LoadingState message="Analyzing directory and scoring potential matches..." />
+        <LoadingState message="Checking directory and finding potential matches..." />
       ) : filteredMatches.length === 0 ? (
         <EmptyState
           icon={Sparkles}
           title="No Matching Pairs Found"
           description={
             searchQuery || selectedTier !== 'all' || selectedCategory !== 'all' || feedbackFilter !== 'all' || statusFilter !== 'all'
-              ? 'No AI matches found matching your selected criteria. Try adjusting your filters or resetting the search.'
-              : 'There are currently no active lost-and-found reports with sufficient similarity. When new reports are filed, FindIt will automatically identify potential matches.'
+              ? 'No matches found matching your selected criteria. Try adjusting your filters or resetting the search.'
+              : 'There are currently no active reports with sufficient similarity. When new reports are filed, FindIt will automatically suggest potential matches.'
           }
           actionText="Run Directory Scan"
           onAction={handleScan}
@@ -462,7 +462,7 @@ export const AiMatchesPage: React.FC = () => {
             const isPossible = score >= 50 && score < 80;
 
             const tierBadge = isStrong ? (
-              <span className="text-[11px] uppercase font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span className="text-[11px] uppercase font-bold px-2.5 py-1 rounded-full bg-[#E5EFE6] text-[#3E6B4A] border border-[#CDE1CE]">
                 Strong Match
               </span>
             ) : isPossible ? (
@@ -470,7 +470,7 @@ export const AiMatchesPage: React.FC = () => {
                 Possible Match
               </span>
             ) : (
-              <span className="text-[11px] uppercase font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              <span className="text-[11px] uppercase font-bold px-2.5 py-1 rounded-full bg-[#F7EBD7] text-[#8F6325] border border-[#EEDCBE]">
                 Low Confidence
               </span>
             );
@@ -478,17 +478,17 @@ export const AiMatchesPage: React.FC = () => {
             return (
               <div
                 key={match.id}
-                className="p-6 rounded-3xl bg-findit-card border border-findit-border shadow-xl space-y-6 hover:border-findit-border-hover transition-all"
+                className="p-6 rounded-3xl bg-white border border-findit-border shadow-subtle space-y-6 hover:border-findit-primary/40 transition-all"
               >
                 {/* Match Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-findit-border/60">
                   <div className="flex items-center gap-3.5">
                     <div className="p-3 rounded-2xl bg-findit-primary/10 text-findit-primary border border-findit-primary/20 shrink-0">
-                      <Sparkles className="w-6 h-6 text-findit-secondary" />
+                      <Sparkles className="w-6 h-6 text-findit-primary" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-base font-bold text-white">AI Match Recommendation</h3>
+                        <h3 className="text-base font-bold text-findit-text">Suggested Match</h3>
                         {tierBadge}
                         {match.status && match.status !== 'suggested' && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-findit-bg border border-findit-border text-findit-muted uppercase">
@@ -496,13 +496,13 @@ export const AiMatchesPage: React.FC = () => {
                           </span>
                         )}
                         {match.feedback && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-findit-bg border border-findit-border text-findit-secondary">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-findit-bg border border-findit-border text-findit-primary">
                             Feedback: {match.feedback.replace('_', ' ')}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-findit-subtle mt-0.5">
-                        Pairing analysis between lost #{match.lostItem?.id || match.lostItemId} and found #
+                      <p className="text-xs text-findit-muted mt-0.5">
+                        Comparison between lost #{match.lostItem?.id || match.lostItemId} and found #
                         {match.foundItem?.id || match.foundItemId}
                       </p>
                     </div>
@@ -511,10 +511,10 @@ export const AiMatchesPage: React.FC = () => {
                   {/* Confidence Score Pill */}
                   <div className="flex items-center gap-3 self-start sm:self-auto bg-findit-bg px-4 py-2 rounded-2xl border border-findit-border shrink-0">
                     <div className="text-right">
-                      <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-findit-primary to-findit-secondary">
+                      <div className="text-2xl font-black text-findit-text">
                         {score}%
                       </div>
-                      <div className="text-[10px] text-findit-subtle uppercase tracking-wider font-semibold">
+                      <div className="text-[10px] text-findit-muted uppercase tracking-wider font-semibold">
                         Overall Match
                       </div>
                     </div>
@@ -541,7 +541,7 @@ export const AiMatchesPage: React.FC = () => {
                         className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-sm font-bold text-white truncate">
+                        <h4 className="text-sm font-bold text-findit-text truncate">
                           {match.lostItem?.title || 'Reported Lost Item'}
                         </h4>
                         <p className="text-xs text-findit-muted line-clamp-2 mt-1">
@@ -550,13 +550,13 @@ export const AiMatchesPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-findit-border/40 text-xs text-findit-subtle space-y-1">
+                    <div className="pt-2 border-t border-findit-border/40 text-xs text-findit-muted space-y-1">
                       <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-findit-secondary shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-findit-primary shrink-0" />
                         <span className="truncate">{match.lostItem?.location || 'Campus'}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-findit-primary shrink-0" />
+                        <Calendar className="w-3.5 h-3.5 text-findit-muted shrink-0" />
                         <span>Reported {match.lostItem?.date ? formatDate(match.lostItem.date) : 'Recently'}</span>
                       </div>
                     </div>
@@ -564,7 +564,7 @@ export const AiMatchesPage: React.FC = () => {
                     {match.lostItem?.id && (
                       <Link
                         to={`/dashboard/items/${match.lostItem.id}`}
-                        className="block text-center py-2 rounded-xl text-xs font-semibold bg-findit-card hover:bg-findit-card-hover border border-findit-border text-findit-text transition-colors"
+                        className="block text-center py-2 min-h-[38px] rounded-xl text-xs font-semibold bg-findit-card hover:bg-findit-bg border border-findit-border text-findit-text transition-colors"
                       >
                         View Lost Listing &rarr;
                       </Link>
@@ -589,7 +589,7 @@ export const AiMatchesPage: React.FC = () => {
                         className="w-16 h-16 rounded-xl object-cover border border-findit-border shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-sm font-bold text-white truncate">
+                        <h4 className="text-sm font-bold text-findit-text truncate">
                           {match.foundItem?.title || 'Reported Found Item'}
                         </h4>
                         <p className="text-xs text-findit-muted line-clamp-2 mt-1">
@@ -598,13 +598,13 @@ export const AiMatchesPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-findit-border/40 text-xs text-findit-subtle space-y-1">
+                    <div className="pt-2 border-t border-findit-border/40 text-xs text-findit-muted space-y-1">
                       <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-findit-secondary shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-findit-primary shrink-0" />
                         <span className="truncate">{match.foundItem?.location || 'Campus'}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-findit-primary shrink-0" />
+                        <Calendar className="w-3.5 h-3.5 text-findit-muted shrink-0" />
                         <span>Turned in {match.foundItem?.date ? formatDate(match.foundItem.date) : 'Recently'}</span>
                       </div>
                     </div>
@@ -612,7 +612,7 @@ export const AiMatchesPage: React.FC = () => {
                     {match.foundItem?.id && (
                       <Link
                         to={`/dashboard/items/${match.foundItem.id}`}
-                        className="block text-center py-2 rounded-xl text-xs font-semibold bg-findit-card hover:bg-findit-card-hover border border-findit-border text-findit-text transition-colors"
+                        className="block text-center py-2 min-h-[38px] rounded-xl text-xs font-semibold bg-findit-card hover:bg-findit-bg border border-findit-border text-findit-text transition-colors"
                       >
                         View Found Listing &rarr;
                       </Link>
@@ -621,34 +621,34 @@ export const AiMatchesPage: React.FC = () => {
                 </div>
 
                 {/* Multi-Signal Breakdown Bar & Reasons */}
-                <div className="p-4 rounded-2xl bg-findit-sidebar/60 border border-findit-border/80 space-y-3">
+                <div className="p-4 rounded-2xl bg-findit-bg border border-findit-border space-y-3">
                   <div className="flex items-center justify-between">
                     <h5 className="text-xs font-bold uppercase tracking-wider text-findit-primary flex items-center gap-1.5">
                       <SlidersHorizontal className="w-3.5 h-3.5" />
                       Algorithmic Match Factors
                     </h5>
-                    <span className="text-[10px] text-findit-subtle">Normalized Score Breakdown</span>
+                    <span className="text-[10px] text-findit-muted">Normalized Score Breakdown</span>
                   </div>
 
                   {/* Sub-Score Pills */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div className="p-2 rounded-xl bg-findit-bg border border-findit-border">
-                      <span className="text-findit-subtle block text-[10px]">Semantic Similarity</span>
-                      <span className="font-bold text-white">
+                    <div className="p-2 rounded-xl bg-white border border-findit-border">
+                      <span className="text-findit-muted block text-[10px]">Semantic Similarity</span>
+                      <span className="font-bold text-findit-text">
                         {match.semanticScore ?? match.similarityScore ?? 0}%
                       </span>
                     </div>
-                    <div className="p-2 rounded-xl bg-findit-bg border border-findit-border">
-                      <span className="text-findit-subtle block text-[10px]">Attributes (Brand/Color)</span>
-                      <span className="font-bold text-white">{match.attributeScore ?? 80}%</span>
+                    <div className="p-2 rounded-xl bg-white border border-findit-border">
+                      <span className="text-findit-muted block text-[10px]">Attributes (Brand/Color)</span>
+                      <span className="font-bold text-findit-text">{match.attributeScore ?? 80}%</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-findit-bg border border-findit-border">
-                      <span className="text-findit-subtle block text-[10px]">Location Proximity</span>
-                      <span className="font-bold text-white">{match.locationScore ?? 85}%</span>
+                    <div className="p-2 rounded-xl bg-white border border-findit-border">
+                      <span className="text-findit-muted block text-[10px]">Location Proximity</span>
+                      <span className="font-bold text-findit-text">{match.locationScore ?? 85}%</span>
                     </div>
-                    <div className="p-2 rounded-xl bg-findit-bg border border-findit-border">
-                      <span className="text-findit-subtle block text-[10px]">Date Alignment</span>
-                      <span className="font-bold text-white">{match.dateScore ?? 90}%</span>
+                    <div className="p-2 rounded-xl bg-white border border-findit-border">
+                      <span className="text-findit-muted block text-[10px]">Date Alignment</span>
+                      <span className="font-bold text-findit-text">{match.dateScore ?? 90}%</span>
                     </div>
                   </div>
 
@@ -656,17 +656,17 @@ export const AiMatchesPage: React.FC = () => {
                   <ul className="space-y-1.5 pt-1">
                     {(match.matchReasons || match.reasons || [match.explanation]).map((reason, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-xs text-findit-muted">
-                        <CheckCircle className="w-3.5 h-3.5 text-findit-secondary shrink-0 mt-0.5" />
+                        <CheckCircle className="w-3.5 h-3.5 text-findit-primary shrink-0 mt-0.5" />
                         <span>{reason}</span>
                       </li>
                     ))}
                   </ul>
 
                   {match.feedbackNotes && (
-                    <div className="p-2.5 rounded-xl bg-findit-bg/80 border border-findit-border/70 text-xs text-findit-subtle flex items-start gap-2">
+                    <div className="p-2.5 rounded-xl bg-white border border-findit-border text-xs text-findit-muted flex items-start gap-2">
                       <MessageSquare className="w-3.5 h-3.5 text-findit-primary shrink-0 mt-0.5" />
                       <div>
-                        <strong className="text-white">Feedback Note: </strong>
+                        <strong className="text-findit-text">Feedback Note: </strong>
                         <span>{match.feedbackNotes}</span>
                       </div>
                     </div>
@@ -674,10 +674,10 @@ export const AiMatchesPage: React.FC = () => {
                 </div>
 
                 {/* Card Actions: Complete Feedback + Status + Claim Item */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-findit-border/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-findit-border">
                   {/* Complete 4 Feedback Actions */}
                   <div className="space-y-1.5">
-                    <span className="text-[11px] text-findit-subtle font-medium block">
+                    <span className="text-[11px] text-findit-muted font-medium block">
                       Evaluate this suggestion:
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -685,8 +685,8 @@ export const AiMatchesPage: React.FC = () => {
                         onClick={() => handleFeedback(match.id, 'relevant')}
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                           match.feedback === 'relevant'
-                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm'
-                            : 'bg-findit-bg text-findit-muted hover:text-white border-findit-border'
+                            ? 'bg-findit-success text-findit-success-text border-findit-border shadow-xs'
+                            : 'bg-white text-findit-muted hover:text-findit-text border-findit-border'
                         }`}
                         title="Relevant match"
                       >
@@ -698,8 +698,8 @@ export const AiMatchesPage: React.FC = () => {
                         onClick={() => handleFeedback(match.id, 'not_relevant')}
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                           match.feedback === 'not_relevant'
-                            ? 'bg-red-500/20 text-red-400 border-red-500/40 shadow-sm'
-                            : 'bg-findit-bg text-findit-muted hover:text-white border-findit-border'
+                            ? 'bg-findit-danger text-findit-danger-text border-findit-border shadow-xs'
+                            : 'bg-white text-findit-muted hover:text-findit-text border-findit-border'
                         }`}
                         title="Not relevant match"
                       >
@@ -711,8 +711,8 @@ export const AiMatchesPage: React.FC = () => {
                         onClick={() => handleFeedback(match.id, 'already_recovered')}
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                           match.feedback === 'already_recovered'
-                            ? 'bg-blue-500/20 text-blue-400 border-blue-500/40 shadow-sm'
-                            : 'bg-findit-bg text-findit-muted hover:text-white border-findit-border'
+                            ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-xs'
+                            : 'bg-white text-findit-muted hover:text-findit-text border-findit-border'
                         }`}
                         title="Item has already been recovered"
                       >
@@ -724,8 +724,8 @@ export const AiMatchesPage: React.FC = () => {
                         onClick={() => handleFeedback(match.id, 'duplicate')}
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                           match.feedback === 'duplicate'
-                            ? 'bg-purple-500/20 text-purple-400 border-purple-500/40 shadow-sm'
-                            : 'bg-findit-bg text-findit-muted hover:text-white border-findit-border'
+                            ? 'bg-purple-50 text-purple-700 border-purple-200 shadow-xs'
+                            : 'bg-white text-findit-muted hover:text-findit-text border-findit-border'
                         }`}
                         title="Duplicate match recommendation"
                       >
@@ -740,7 +740,7 @@ export const AiMatchesPage: React.FC = () => {
                             feedbackType: (match.feedback as any) || 'relevant',
                           })
                         }
-                        className="px-2 py-1.5 rounded-xl text-xs text-findit-muted hover:text-white bg-findit-bg border border-findit-border flex items-center gap-1"
+                        className="px-2.5 py-1.5 rounded-xl text-xs text-findit-muted hover:text-findit-text bg-white border border-findit-border flex items-center gap-1"
                         title="Add comment"
                       >
                         <MessageSquare className="w-3 h-3" />
@@ -754,7 +754,7 @@ export const AiMatchesPage: React.FC = () => {
                     {match.status !== 'dismissed' ? (
                       <button
                         onClick={() => handleStatusChange(match.id, 'dismissed')}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-findit-bg hover:bg-findit-card border border-findit-border text-findit-muted hover:text-red-400 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-white hover:bg-findit-bg border border-findit-border text-findit-muted hover:text-findit-danger-text transition-colors"
                         title="Dismiss this recommendation"
                       >
                         <EyeOff className="w-3.5 h-3.5" />
@@ -763,7 +763,7 @@ export const AiMatchesPage: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => handleStatusChange(match.id, 'suggested')}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-findit-bg hover:bg-findit-card border border-findit-border text-findit-muted hover:text-white transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-white hover:bg-findit-bg border border-findit-border text-findit-muted hover:text-findit-text transition-colors"
                         title="Restore match recommendation"
                       >
                         Restore
@@ -773,7 +773,7 @@ export const AiMatchesPage: React.FC = () => {
                     {match.foundItem?.id && (
                       <Link
                         to={`/dashboard/items/${match.foundItem.id}`}
-                        className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-findit-secondary hover:bg-findit-secondary/90 text-black font-bold text-xs shadow-lg shadow-findit-secondary/20 transition-all shrink-0"
+                        className="flex items-center justify-center gap-2 px-4 py-2 min-h-[40px] rounded-xl bg-findit-primary hover:bg-findit-primary-hover text-white font-semibold text-xs shadow-subtle transition-all shrink-0"
                       >
                         <span>Claim Found Item</span>
                         <ArrowRight className="w-4 h-4" />
@@ -787,15 +787,15 @@ export const AiMatchesPage: React.FC = () => {
 
           {/* Clean Pagination Bar */}
           {filteredMatches.length > 0 && (
-            <div className="p-4 rounded-2xl bg-findit-card border border-findit-border flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-white border border-findit-border shadow-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3 text-xs text-findit-muted">
                 <span>
                   Showing{' '}
-                  <strong className="text-white">
+                  <strong className="text-findit-text">
                     {(currentPage - 1) * pageSize + 1} -{' '}
                     {Math.min(currentPage * pageSize, filteredMatches.length)}
                   </strong>{' '}
-                  of <strong className="text-white">{filteredMatches.length}</strong> matches
+                  of <strong className="text-findit-text">{filteredMatches.length}</strong> matches
                 </span>
 
                 <span className="text-findit-border">|</span>
@@ -805,7 +805,7 @@ export const AiMatchesPage: React.FC = () => {
                   <select
                     value={pageSize}
                     onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="px-2 py-1 rounded-lg bg-findit-bg border border-findit-border text-white text-xs focus:outline-none focus:border-findit-primary"
+                    className="px-2 py-1 rounded-lg bg-findit-bg border border-findit-border text-findit-text text-xs focus:outline-none focus:border-findit-primary"
                   >
                     <option value={5}>5</option>
                     <option value={10}>10</option>
@@ -818,7 +818,7 @@ export const AiMatchesPage: React.FC = () => {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-xl bg-findit-bg border border-findit-border text-findit-muted hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 min-w-[36px] min-h-[36px] rounded-xl bg-white border border-findit-border text-findit-muted hover:text-findit-text disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   aria-label="Previous Page"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -838,14 +838,14 @@ export const AiMatchesPage: React.FC = () => {
                     return (
                       <React.Fragment key={page}>
                         {showEllipsis && (
-                          <span className="px-2 text-findit-subtle text-xs">...</span>
+                          <span className="px-2 text-findit-muted text-xs">...</span>
                         )}
                         <button
                           onClick={() => setCurrentPage(page)}
                           className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
                             currentPage === page
-                              ? 'bg-findit-primary text-black'
-                              : 'bg-findit-bg border border-findit-border text-findit-muted hover:text-white'
+                              ? 'bg-findit-primary text-white shadow-subtle'
+                              : 'bg-white border border-findit-border text-findit-muted hover:text-findit-text'
                           }`}
                         >
                           {page}
@@ -857,7 +857,7 @@ export const AiMatchesPage: React.FC = () => {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-xl bg-findit-bg border border-findit-border text-findit-muted hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 min-w-[36px] min-h-[36px] rounded-xl bg-white border border-findit-border text-findit-muted hover:text-findit-text disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   aria-label="Next Page"
                 >
                   <ChevronRight className="w-4 h-4" />

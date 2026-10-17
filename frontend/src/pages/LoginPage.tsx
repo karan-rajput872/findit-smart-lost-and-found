@@ -94,36 +94,36 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-10 sm:py-14">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <BrandLogo size="lg" className="justify-center" />
-          <h2 className="text-2xl font-bold tracking-tight text-white pt-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-findit-text pt-2">
             Sign in to FindIt
           </h2>
-          <p className="text-xs text-findit-muted">
+          <p className="text-xs sm:text-sm text-findit-muted">
             Access your campus reports, tracked claims, and match alerts
           </p>
         </div>
 
         {/* Demo Account Helper Callout */}
-        <div className="p-3.5 rounded-xl bg-findit-primary/10 border border-findit-primary/25 text-xs text-findit-primary-light space-y-2">
+        <div className="p-3.5 rounded-2xl bg-white border border-findit-border text-xs text-findit-text space-y-2 shadow-subtle">
           <div className="flex items-center justify-between">
-            <span className="font-bold">Demo Accounts Available:</span>
-            <span className="text-[10px] text-findit-muted uppercase tracking-wider">Fast Fill</span>
+            <span className="font-bold text-findit-primary">Demo Accounts:</span>
+            <span className="text-[10px] text-findit-muted uppercase tracking-wider font-semibold">One-Click Fill</span>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => fillDemoCredentials('alex.morgan@campus.edu', 'CampusPass123!')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-findit-primary/20 hover:bg-findit-primary/30 text-white transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-findit-bg hover:bg-findit-secondary_bg border border-findit-border text-findit-text transition-colors min-h-[32px]"
             >
-              Student (Alex Morgan)
+              Student (Alex)
             </button>
             <button
               type="button"
               onClick={() => fillDemoCredentials('library-help@campus.edu', 'StaffPass123!')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-findit-primary/20 hover:bg-findit-primary/30 text-white transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-findit-bg hover:bg-findit-secondary_bg border border-findit-border text-findit-text transition-colors min-h-[32px]"
             >
               Library Staff
             </button>
@@ -131,20 +131,20 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {successMessage && (
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+          <div className="p-3.5 rounded-xl bg-findit-found-bg border border-[#CEE0D0] text-xs text-[#2D593A] flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#4E7A5A]" />
             <span>{successMessage}</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-findit-danger/10 border border-findit-danger/30 text-xs text-findit-danger flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-findit-danger-bg border border-findit-border text-xs text-findit-danger flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <div className="p-7 rounded-2xl bg-findit-card border border-findit-border shadow-xl space-y-6">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-findit-border shadow-card space-y-6">
           {/* Prominent Google Sign-In */}
           <div className="space-y-4">
             <GoogleSignInButton
@@ -160,7 +160,7 @@ export const LoginPage: React.FC = () => {
             {/* Visual Separator */}
             <div className="relative flex items-center justify-center py-1">
               <div className="w-full border-t border-findit-border" />
-              <span className="absolute px-3 text-[11px] font-bold uppercase tracking-wider bg-findit-card text-findit-muted">
+              <span className="absolute px-3 text-[11px] font-bold uppercase tracking-wider bg-white text-findit-muted">
                 OR
               </span>
             </div>
@@ -199,38 +199,38 @@ export const LoginPage: React.FC = () => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-findit-border bg-findit-bg text-findit-primary focus:ring-0"
+                  className="rounded border-findit-border text-findit-primary focus:ring-0"
                 />
                 <span>Remember me</span>
               </label>
 
               <span className="text-findit-subtle text-[11px]">
-                KIIT Campus Authentication
+                Campus Authentication
               </span>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white bg-findit-primary hover:bg-findit-primary-hover disabled:opacity-50 shadow-glow-primary transition-all duration-150"
+              className="w-full mt-4 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white bg-findit-primary hover:bg-findit-primary-hover disabled:opacity-50 shadow-subtle transition-all duration-150 min-h-[44px]"
             >
               {isSubmitting ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Authenticating...</span>
+                  <span>Signing in...</span>
                 </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
-                  <span>Sign In to Dashboard</span>
+                  <span>Sign In</span>
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-findit-border/60 text-center text-xs text-findit-muted">
+          <div className="mt-6 pt-5 border-t border-findit-border text-center text-xs text-findit-muted">
             Don't have a FindIt account yet?{' '}
-            <Link to="/register" className="font-semibold text-findit-secondary hover:underline">
+            <Link to="/register" className="font-bold text-findit-primary hover:underline">
               Create an account
             </Link>
           </div>

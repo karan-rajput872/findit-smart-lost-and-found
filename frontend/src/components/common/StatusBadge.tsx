@@ -19,7 +19,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type, size = '
       >
         <span
           className={`w-1.5 h-1.5 rounded-full ${
-            isLost ? 'bg-red-400' : 'bg-teal-400'
+            isLost ? 'bg-[#C25E54]' : 'bg-[#4E7A5A]'
           }`}
         />
         {isLost ? 'Lost Item' : 'Found Item'}
@@ -28,11 +28,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type, size = '
   }
 
   if (status) {
-    let colorClasses = 'text-slate-300 bg-slate-800/80 border-slate-700';
-    if (status === 'open') colorClasses = 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20';
-    if (status === 'pending_verification') colorClasses = 'text-amber-300 bg-amber-500/10 border-amber-500/20';
-    if (status === 'claimed') colorClasses = 'text-blue-300 bg-blue-500/10 border-blue-500/20';
-    if (status === 'resolved') colorClasses = 'text-purple-300 bg-purple-500/10 border-purple-500/20';
+    let colorClasses = 'text-[#5C665F] bg-[#EFECE6] border-[#DDD8CD]';
+    if (status === 'open') colorClasses = 'text-[#3E6B4A] bg-[#E5EFE6] border-[#CEE0D0]';
+    if (status === 'pending_verification') colorClasses = 'text-[#8F6325] bg-[#F7EBD7] border-[#EADABF]';
+    if (status === 'claimed') colorClasses = 'text-[#4A6478] bg-[#EBF1F5] border-[#D4E0E8]';
+    if (status === 'resolved') colorClasses = 'text-[#3E6B4A] bg-[#E5EFE6] border-[#CEE0D0]';
 
     return (
       <span className={`inline-flex items-center font-medium rounded-full border ${colorClasses} ${sizeClasses}`}>

@@ -104,13 +104,13 @@ export const DemoBanner: React.FC = () => {
                   <Server className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Backend Diagnostic Status</h3>
+                  <h3 className="text-base font-bold text-findit-text">Backend Diagnostic Status</h3>
                   <p className="text-xs text-findit-muted">FastAPI + PostgreSQL Connectivity Monitor</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowDiagModal(false)}
-                className="text-findit-muted hover:text-white p-1 rounded-lg hover:bg-findit-bg"
+                className="text-findit-muted hover:text-findit-text p-1 rounded-lg hover:bg-findit-bg"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />

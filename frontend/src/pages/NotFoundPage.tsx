@@ -10,7 +10,7 @@ export const NotFoundPage: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-4xl font-black text-white">404 — Page Not Found</h1>
+        <h1 className="text-4xl font-black text-findit-text">404 — Page Not Found</h1>
         <p className="text-sm text-findit-muted max-w-md mx-auto">
           It looks like this page wandered off somewhere on campus. Let's get you back to safety.
         </p>

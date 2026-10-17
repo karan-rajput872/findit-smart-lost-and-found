@@ -124,23 +124,19 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
       }}
     >
       <div
-        className="relative w-full max-w-lg my-auto rounded-2xl shadow-2xl border border-[#2E384D] flex flex-col max-h-[92vh] overflow-hidden"
-        style={{ backgroundColor: '#131824' }}
+        className="relative w-full max-w-lg my-auto rounded-2xl shadow-2xl border border-findit-border bg-white flex flex-col max-h-[92vh] overflow-hidden"
       >
         {/* Header */}
-        <div
-          className="flex items-center justify-between p-5 border-b border-[#242C3F] shrink-0"
-          style={{ backgroundColor: '#181F2F' }}
-        >
+        <div className="flex items-center justify-between p-5 border-b border-findit-border bg-findit-bg shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <div className="w-10 h-10 rounded-xl bg-findit-primary/15 border border-findit-primary/25 flex items-center justify-center text-findit-primary">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="contact-modal-title" className="text-base font-bold text-white leading-snug">
+              <h2 id="contact-modal-title" className="text-base font-bold text-findit-text leading-snug">
                 Contact & Coordination Settings
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-findit-muted">
                 Safe item-return communication preferences
               </p>
             </div>
@@ -148,7 +144,7 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-lg text-findit-muted hover:text-findit-text hover:bg-findit-card transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -158,28 +154,25 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
         {/* Content Form */}
         <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 flex-1">
           {/* Privacy Guarantee Banner */}
-          <div
-            className="p-3.5 rounded-xl border border-indigo-500/25 flex items-start gap-3"
-            style={{ backgroundColor: 'rgba(139, 124, 255, 0.08)' }}
-          >
-            <ShieldCheck className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl border border-[#CDE1CE] bg-[#E5EFE6] flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-findit-primary shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
-              <span className="font-semibold text-white block">Strict Campus Privacy</span>
-              <p className="text-slate-300 leading-relaxed">
-                Your phone numbers are <strong className="text-white font-semibold">never public</strong> on item cards or search. Numbers are only revealed after claim approval and <strong className="text-white font-semibold">explicit mutual consent</strong>.
+              <span className="font-semibold text-findit-text block">Strict Campus Privacy</span>
+              <p className="text-findit-muted leading-relaxed">
+                Your phone numbers are <strong className="text-findit-text font-semibold">never public</strong> on item cards or search. Numbers are only revealed after claim approval and <strong className="text-findit-text font-semibold">explicit mutual consent</strong>.
               </p>
             </div>
           </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center gap-2 text-xs text-red-300">
+            <div className="p-3 rounded-xl bg-[#F6E5E2] border border-[#ECD1CC] flex items-center gap-2 text-xs text-[#A84A42]">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-300">
+            <div className="p-3 rounded-xl bg-[#E5EFE6] border border-[#CDE1CE] flex items-center gap-2 text-xs text-[#3E6B4A]">
               <Check className="w-4 h-4 shrink-0" />
               <span>{success}</span>
             </div>
@@ -187,32 +180,28 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
 
           {/* Mobile Number */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-findit-text uppercase tracking-wider">
               Mobile Phone Number
             </label>
             <div className="relative">
-              <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Phone className="w-4 h-4 text-findit-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 placeholder="+91 9876543210 or 10-digit number"
-                className="w-full border border-[#2E384D] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-all"
-                style={{ backgroundColor: '#0B0E17' }}
+                className="w-full border border-findit-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-findit-text placeholder-findit-muted focus:border-findit-primary focus:outline-none focus:ring-1 focus:ring-findit-primary bg-white transition-all min-h-[44px]"
               />
             </div>
-            <p className="text-[11px] text-slate-400 flex items-center gap-1">
-              <Info className="w-3 h-3 shrink-0 text-slate-500" />
+            <p className="text-[11px] text-findit-muted flex items-center gap-1">
+              <Info className="w-3 h-3 shrink-0 text-findit-muted" />
               Include country code (e.g. +91 for India, +1 for US/Canada)
             </p>
           </div>
 
           {/* Same as phone toggle */}
-          <div
-            className="flex items-center justify-between p-3.5 rounded-xl border border-[#2E384D]"
-            style={{ backgroundColor: '#181F2F' }}
-          >
-            <label htmlFor="same-phone-toggle" className="text-xs text-white font-medium cursor-pointer select-none">
+          <div className="flex items-center justify-between p-3.5 rounded-xl border border-findit-border bg-findit-bg">
+            <label htmlFor="same-phone-toggle" className="text-xs text-findit-text font-medium cursor-pointer select-none">
               WhatsApp number is the same as mobile number
             </label>
             <input
@@ -220,25 +209,24 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
               type="checkbox"
               checked={whatsappSameAsPhone}
               onChange={(e) => handleSameAsPhoneToggle(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-600 text-indigo-500 focus:ring-indigo-400 cursor-pointer accent-indigo-500"
+              className="w-5 h-5 rounded border-findit-border text-findit-primary focus:ring-findit-primary cursor-pointer accent-findit-primary"
             />
           </div>
 
           {/* Dedicated WhatsApp Number (if different) */}
           {!whatsappSameAsPhone && (
             <div className="space-y-1.5 animate-fadeIn">
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-findit-text uppercase tracking-wider">
                 WhatsApp Phone Number
               </label>
               <div className="relative">
-                <MessageSquare className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <MessageSquare className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="tel"
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
                   placeholder="+91 9876543210"
-                  className="w-full border border-[#2E384D] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-all"
-                  style={{ backgroundColor: '#0B0E17' }}
+                  className="w-full border border-findit-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-findit-text placeholder-findit-muted focus:border-findit-primary focus:outline-none focus:ring-1 focus:ring-findit-primary bg-white transition-all min-h-[44px]"
                 />
               </div>
             </div>
@@ -246,10 +234,10 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
 
           {/* Preferred Return Coordination Method */}
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-findit-text uppercase tracking-wider">
               Preferred Return Coordination Method
             </label>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {[
                 { id: 'findit_chat', label: 'FindIt Chat', desc: 'Secure in-app' },
                 { id: 'whatsapp', label: 'WhatsApp', desc: 'Quick messaging' },
@@ -259,35 +247,27 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => setPreferredMethod(opt.id as any)}
-                  className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                  className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all min-h-[56px] ${
                     preferredMethod === opt.id
-                      ? 'border-indigo-400 text-white shadow-sm ring-1 ring-indigo-400/50'
-                      : 'border-[#2E384D] text-slate-300 hover:border-slate-500 hover:text-white'
+                      ? 'border-findit-primary text-findit-text bg-findit-primary/15 ring-1 ring-findit-primary'
+                      : 'border-findit-border text-findit-muted hover:border-findit-primary/50 hover:text-findit-text bg-white'
                   }`}
-                  style={{
-                    backgroundColor:
-                      preferredMethod === opt.id
-                        ? 'rgba(139, 124, 255, 0.18)'
-                        : '#181F2F',
-                  }}
                 >
                   <span className="text-xs font-bold block">{opt.label}</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">{opt.desc}</span>
+                  <span className="text-[10px] text-findit-muted block mt-0.5">{opt.desc}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div
-            className="flex items-center justify-between pt-4 mt-2 border-t border-[#242C3F]"
-          >
+          <div className="flex items-center justify-between pt-4 mt-2 border-t border-findit-border">
             {user.phoneNumber || user.whatsappNumber ? (
               <button
                 type="button"
                 onClick={handleClearDetails}
                 disabled={isSubmitting}
-                className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors"
+                className="text-xs text-[#C25E54] hover:text-[#A84A42] font-semibold transition-colors min-h-[44px] px-2 flex items-center"
               >
                 Clear numbers
               </button>
@@ -297,14 +277,14 @@ export const ContactSettingsModal: React.FC<ContactSettingsModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-findit-muted hover:text-findit-text hover:bg-findit-bg transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/30 disabled:opacity-50"
+                className="px-5 py-2.5 min-h-[44px] rounded-xl text-xs font-bold text-white bg-findit-primary hover:bg-findit-primary-hover transition-all shadow-subtle disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save Preferences'}
               </button>

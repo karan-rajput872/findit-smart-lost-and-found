@@ -129,7 +129,7 @@ export const MyClaimsPage: React.FC = () => {
           }`}
         >
           <span>{feedback.message}</span>
-          <button onClick={() => setFeedback(null)} className="text-white hover:opacity-80">
+          <button onClick={() => setFeedback(null)} className="text-findit-text hover:opacity-80 min-h-[32px] px-2 font-bold">
             ✕
           </button>
         </div>
@@ -137,21 +137,21 @@ export const MyClaimsPage: React.FC = () => {
 
       {/* Overview Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-findit-card border border-findit-border shadow-sm">
+        <div className="p-4 rounded-2xl bg-white border border-findit-border shadow-subtle">
           <p className="text-[11px] font-semibold text-findit-muted uppercase tracking-wider">Total Claims</p>
-          <p className="text-2xl font-black text-white mt-1">{counts.total}</p>
+          <p className="text-2xl font-black text-findit-text mt-1">{counts.total}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-findit-card border border-amber-500/20 shadow-sm">
-          <p className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">In Review</p>
-          <p className="text-2xl font-black text-amber-300 mt-1">{counts.pending}</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#EEDCBE] shadow-subtle">
+          <p className="text-[11px] font-semibold text-[#8F6325] uppercase tracking-wider">In Review</p>
+          <p className="text-2xl font-black text-findit-text mt-1">{counts.pending}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-findit-card border border-emerald-500/20 shadow-sm">
-          <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Approved</p>
-          <p className="text-2xl font-black text-emerald-300 mt-1">{counts.approved}</p>
+        <div className="p-4 rounded-2xl bg-white border border-[#CDE1CE] shadow-subtle">
+          <p className="text-[11px] font-semibold text-[#3E6B4A] uppercase tracking-wider">Approved</p>
+          <p className="text-2xl font-black text-findit-text mt-1">{counts.approved}</p>
         </div>
-        <div className="p-4 rounded-2xl bg-findit-card border border-purple-500/20 shadow-sm">
-          <p className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">Completed</p>
-          <p className="text-2xl font-black text-purple-300 mt-1">{counts.completed}</p>
+        <div className="p-4 rounded-2xl bg-white border border-findit-border shadow-subtle">
+          <p className="text-[11px] font-semibold text-findit-primary uppercase tracking-wider">Completed</p>
+          <p className="text-2xl font-black text-findit-text mt-1">{counts.completed}</p>
         </div>
       </div>
 
@@ -162,10 +162,10 @@ export const MyClaimsPage: React.FC = () => {
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+              className={`px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold capitalize transition-all ${
                 statusFilter === status
-                  ? 'bg-findit-primary text-white shadow-glow-primary'
-                  : 'bg-findit-card border border-findit-border text-findit-muted hover:text-white hover:bg-findit-card/80'
+                  ? 'bg-findit-primary text-white shadow-subtle'
+                  : 'bg-white border border-findit-border text-findit-muted hover:text-findit-text hover:bg-findit-bg'
               }`}
             >
               {status.replace('_', ' ')}
@@ -178,7 +178,7 @@ export const MyClaimsPage: React.FC = () => {
       {isLoadingClaims ? (
         <div className="text-center py-16 space-y-3">
           <RefreshCw className="w-7 h-7 animate-spin text-findit-primary mx-auto" />
-          <p className="text-sm font-semibold text-white">Loading your claims...</p>
+          <p className="text-sm font-semibold text-findit-text">Loading your claims...</p>
         </div>
       ) : filteredClaims.length === 0 ? (
         <EmptyState
@@ -192,12 +192,12 @@ export const MyClaimsPage: React.FC = () => {
           {filteredClaims.map((claim) => (
             <div
               key={claim.id}
-              className="p-5 rounded-2xl bg-findit-card border border-findit-border hover:border-findit-primary/40 transition-all flex flex-col gap-3"
+              className="p-5 rounded-2xl bg-white border border-findit-border shadow-subtle hover:border-findit-primary/40 transition-all flex flex-col gap-3"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-bold text-white truncate">
+                    <h3 className="text-sm font-bold text-findit-text truncate">
                       {claim.itemTitle || `Claim for Item #${claim.itemId}`}
                     </h3>
                     {getStatusBadge(claim.status)}
@@ -207,19 +207,19 @@ export const MyClaimsPage: React.FC = () => {
                     <span className="font-semibold text-findit-text">Your explanation:</span> {claim.description}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-4 text-[11px] text-findit-subtle pt-1">
+                  <div className="flex flex-wrap items-center gap-4 text-[11px] text-findit-muted pt-1">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
+                      <Calendar className="w-3.5 h-3.5 text-findit-primary" />
                       Submitted: {(claim.createdAt || claim.dateSubmitted) ? formatDate(claim.createdAt || claim.dateSubmitted!) : 'Recently'}
                     </span>
                     {claim.reviewNotes && (
-                      <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                      <span className="flex items-center gap-1 text-[#3E6B4A] font-medium">
                         <MessageSquare className="w-3.5 h-3.5" />
                         Review note attached
                       </span>
                     )}
                     {claim.handoverStatus && (
-                      <span className="flex items-center gap-1 text-purple-400 font-medium">
+                      <span className="flex items-center gap-1 text-findit-primary font-medium">
                         <PackageCheck className="w-3.5 h-3.5" />
                         {claim.handoverStatus.replace('_', ' ')}
                       </span>
@@ -232,7 +232,7 @@ export const MyClaimsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedClaim(claim)}
-                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-findit-primary hover:bg-findit-primary-hover transition-all flex items-center gap-1.5 shadow-sm"
+                    className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-semibold text-white bg-findit-primary hover:bg-findit-primary-hover transition-all flex items-center gap-1.5 shadow-subtle"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>View Details</span>
@@ -240,7 +240,7 @@ export const MyClaimsPage: React.FC = () => {
 
                   <Link
                     to={`/dashboard/items/${claim.itemId}`}
-                    className="p-2 rounded-xl text-findit-muted hover:text-white bg-findit-bg border border-findit-border hover:border-findit-border-light transition-colors"
+                    className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-findit-muted hover:text-findit-text bg-white border border-findit-border hover:bg-findit-bg transition-colors"
                     title="View Item Listing"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -250,7 +250,7 @@ export const MyClaimsPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setClaimToCancel(claim)}
-                      className="p-2 rounded-xl text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-colors"
+                      className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-[#A84A42] hover:text-[#C25E54] bg-[#F6E5E2] hover:bg-[#F2D7D3] border border-[#ECD1CC] transition-colors"
                       title="Cancel Claim"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -275,47 +275,47 @@ export const MyClaimsPage: React.FC = () => {
 
       {/* Claim Detail Modal */}
       {selectedClaim && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-findit-sidebar border border-findit-border rounded-3xl max-w-xl w-full p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white border border-findit-border rounded-3xl max-w-xl w-full p-6 space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white">Claim Verification Details</h3>
+                <h3 className="text-lg font-bold text-findit-text">Claim Verification Details</h3>
                 <p className="text-xs text-findit-muted mt-0.5">
-                  ID: <span className="font-mono text-findit-primary">{selectedClaim.id}</span>
+                  ID: <span className="font-mono text-findit-primary font-semibold">{selectedClaim.id}</span>
                 </p>
               </div>
               <button
                 onClick={() => setSelectedClaim(null)}
-                className="p-1 rounded-lg text-findit-muted hover:text-white hover:bg-findit-card transition-colors"
+                className="p-2 rounded-lg text-findit-muted hover:text-findit-text hover:bg-findit-bg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-findit-card border border-findit-border flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-findit-bg border border-findit-border flex items-center justify-between">
               <div>
                 <span className="text-[11px] text-findit-muted uppercase font-bold block">Target Item</span>
-                <span className="text-sm font-semibold text-white">{selectedClaim.itemTitle || selectedClaim.itemId}</span>
+                <span className="text-sm font-semibold text-findit-text">{selectedClaim.itemTitle || selectedClaim.itemId}</span>
               </div>
               {getStatusBadge(selectedClaim.status)}
             </div>
 
             {/* Handover Progress Tracker (if approved/completed) */}
             {['approved', 'completed'].includes(selectedClaim.status.toLowerCase()) && (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wide">
+              <div className="p-4 rounded-2xl bg-[#E5EFE6] border border-[#CDE1CE] space-y-3">
+                <div className="flex items-center gap-2 text-[#3E6B4A] font-bold text-xs uppercase tracking-wide">
                   <PackageCheck className="w-4 h-4" />
                   <span>Return & Handover Coordination</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
-                  <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <div className="p-2 rounded-xl bg-[#D4E8D6] text-[#2D5337] border border-[#BBDCBF]">
                     1. Claim Approved
                   </div>
                   <div
                     className={`p-2 rounded-xl border ${
                       ['handover_arranged', 'returned_successfully'].includes(selectedClaim.handoverStatus || '')
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                        : 'bg-findit-bg text-findit-subtle border-findit-border'
+                        ? 'bg-[#D4E8D6] text-[#2D5337] border-[#BBDCBF]'
+                        : 'bg-white text-findit-muted border-findit-border'
                     }`}
                   >
                     2. Handover Arranged
@@ -323,8 +323,8 @@ export const MyClaimsPage: React.FC = () => {
                   <div
                     className={`p-2 rounded-xl border ${
                       selectedClaim.status.toLowerCase() === 'completed'
-                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                        : 'bg-findit-bg text-findit-subtle border-findit-border'
+                        ? 'bg-[#D4E8D6] text-[#2D5337] border-[#BBDCBF]'
+                        : 'bg-white text-findit-muted border-findit-border'
                     }`}
                   >
                     3. Returned
@@ -332,7 +332,7 @@ export const MyClaimsPage: React.FC = () => {
                 </div>
 
                 {selectedClaim.handoverDetails && (
-                  <div className="p-3 rounded-xl bg-findit-bg/80 border border-findit-border text-xs text-white">
+                  <div className="p-3 rounded-xl bg-white border border-findit-border text-xs text-findit-text">
                     <span className="font-bold text-findit-primary block text-[11px] mb-1">
                       Meeting / Handover Instructions:
                     </span>
@@ -347,7 +347,7 @@ export const MyClaimsPage: React.FC = () => {
               <label className="text-xs font-bold text-findit-text uppercase tracking-wider">
                 Claim Explanation
               </label>
-              <div className="p-3.5 rounded-xl bg-findit-bg border border-findit-border text-xs text-white leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-findit-bg border border-findit-border text-xs text-findit-text leading-relaxed">
                 {selectedClaim.description}
               </div>
             </div>
@@ -355,11 +355,11 @@ export const MyClaimsPage: React.FC = () => {
             {/* Confidential Proof of Ownership */}
             {selectedClaim.proofDetails && (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
+                <label className="text-xs font-bold text-[#8F6325] flex items-center gap-1.5 uppercase tracking-wider">
                   <Lock className="w-3.5 h-3.5" />
                   <span>Private Proof of Ownership (Confidential)</span>
                 </label>
-                <div className="p-3.5 rounded-xl bg-findit-bg border border-amber-500/20 text-xs text-amber-200 leading-relaxed font-mono">
+                <div className="p-3.5 rounded-xl bg-[#F7EBD7] border border-[#EEDCBE] text-xs text-[#6B4B1B] leading-relaxed font-mono">
                   {selectedClaim.proofDetails}
                 </div>
               </div>
@@ -381,7 +381,7 @@ export const MyClaimsPage: React.FC = () => {
             <div className="flex items-center justify-between pt-3 border-t border-findit-border">
               <Link
                 to={`/dashboard/items/${selectedClaim.itemId}`}
-                className="text-xs font-bold text-findit-primary hover:underline flex items-center gap-1"
+                className="text-xs font-bold text-findit-primary hover:underline flex items-center gap-1 min-h-[44px] items-center"
               >
                 <span>View Item Report</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -389,7 +389,7 @@ export const MyClaimsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedClaim(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-findit-card border border-findit-border hover:bg-findit-card/80 transition-colors"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-bold text-findit-text bg-white border border-findit-border hover:bg-findit-bg transition-colors"
               >
                 Close
               </button>

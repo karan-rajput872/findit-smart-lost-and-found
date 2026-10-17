@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { RefreshCw, AlertCircle, Database, ArrowUpDown } from 'lucide-react';
+import { RefreshCw, AlertCircle, ArrowUpDown } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { SearchBar } from '../components/items/SearchBar';
 import { FilterPanel } from '../components/items/FilterPanel';
@@ -9,7 +9,7 @@ import { fetchItemsApi } from '../services/api';
 import type { FilterOptions, Item } from '../types';
 
 export const BrowsePage: React.FC = () => {
-  const { items: contextItems, isLoadingItems: isContextLoading, backendError, refreshBackendData, isBackendOnline, storageMode } = useApp();
+  const { items: contextItems, isLoadingItems: isContextLoading, backendError, refreshBackendData, isBackendOnline } = useApp();
 
   const [filters, setFilters] = useState<FilterOptions>({
     searchQuery: '',
@@ -64,7 +64,7 @@ export const BrowsePage: React.FC = () => {
         setBackendItems(response.items);
         setTotalCount(response.total);
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Failed to query live items';
+        const msg = err instanceof Error ? err.message : "We couldn't complete your request.";
         setQueryError(msg);
         setBackendItems(null);
       } finally {
@@ -79,7 +79,6 @@ export const BrowsePage: React.FC = () => {
     };
   }, [filters, isBackendOnline]);
 
-  // If backend results are available, use them; otherwise fall back to context items with local filtering
   const displayItems = useMemo(() => {
     let source = backendItems !== null ? backendItems : contextItems;
 
@@ -133,41 +132,29 @@ export const BrowsePage: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Explore Campus Directory"
-        description="Search and filter through real-time lost and found reports across all campus departments, libraries, and sites."
+        title="Browse Items"
+        description="Search through lost and found belongings across our campus community."
         badge={
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-findit-primary/10 text-findit-primary border border-findit-primary/30">
-              {activeCount} {activeCount === 1 ? 'Record' : 'Records'}
-            </span>
-            {isBackendOnline ? (
-              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden sm:inline-flex items-center gap-1">
-                <Database className="w-2.5 h-2.5" />
-                Live API ({storageMode === 'in_memory_development' ? 'In-Memory Dev' : 'Postgres'})
-              </span>
-            ) : (
-              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 hidden sm:inline-flex items-center gap-1">
-                Local Dev Mode
-              </span>
-            )}
-          </div>
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-white text-findit-primary border border-findit-border shadow-subtle">
+            {activeCount} {activeCount === 1 ? 'Item' : 'Items'} Listed
+          </span>
         }
       />
 
       {/* Backend connection / query error alert */}
       {(backendError || queryError) && (
-        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs text-amber-200">
+        <div className="p-3.5 rounded-xl bg-findit-warning-bg border border-[#EDDCBE] flex items-center justify-between text-xs text-[#8F6325]">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#996B26] shrink-0" />
             <span>
-              {queryError || backendError} (Showing cached directory).
+              {queryError || backendError || 'Something went wrong. Please try again.'}
             </span>
           </div>
           <button
             onClick={() => refreshBackendData()}
-            className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 font-semibold text-white flex items-center gap-1 transition-colors"
+            className="px-3 py-1 rounded-lg bg-white hover:bg-findit-bg font-semibold text-findit-text border border-findit-border flex items-center gap-1 transition-colors min-h-[32px]"
           >
-            <RefreshCw className="w-3 h-3" />
+            <RefreshCw className="w-3 h-3 text-findit-primary" />
             Retry
           </button>
         </div>
@@ -179,30 +166,31 @@ export const BrowsePage: React.FC = () => {
           <SearchBar
             value={filters.searchQuery}
             onChange={(query) => setFilters((prev) => ({ ...prev, searchQuery: query }))}
+            placeholder="Search by title, description, or keyword (e.g. 'bottle', 'calculator', 'keys')..."
             totalResults={displayItems.length}
           />
         </div>
 
         {/* Sort Order Toggle */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="inline-flex items-center gap-1.5 p-1 rounded-xl bg-findit-card border border-findit-border text-xs text-findit-muted">
-            <ArrowUpDown className="w-3.5 h-3.5 text-findit-subtle ml-1" />
+          <div className="inline-flex items-center gap-1.5 p-1 rounded-xl bg-white border border-findit-border text-xs text-findit-muted shadow-subtle min-h-[44px]">
+            <ArrowUpDown className="w-3.5 h-3.5 text-findit-primary ml-1.5" />
             <button
               onClick={() => setSortOrder('newest')}
-              className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all min-h-[34px] flex items-center justify-center ${
                 sortOrder === 'newest'
-                  ? 'bg-findit-primary text-white shadow-sm'
-                  : 'hover:text-white'
+                  ? 'bg-findit-primary text-white shadow-subtle'
+                  : 'text-findit-muted hover:text-findit-text'
               }`}
             >
               Newest
             </button>
             <button
               onClick={() => setSortOrder('oldest')}
-              className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all min-h-[34px] flex items-center justify-center ${
                 sortOrder === 'oldest'
-                  ? 'bg-findit-primary text-white shadow-sm'
-                  : 'hover:text-white'
+                  ? 'bg-findit-primary text-white shadow-subtle'
+                  : 'text-findit-muted hover:text-findit-text'
               }`}
             >
               Oldest
@@ -224,13 +212,13 @@ export const BrowsePage: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 py-4 text-xs text-findit-muted">
             <RefreshCw className="w-4 h-4 animate-spin text-findit-primary" />
-            <span>Syncing items from backend API...</span>
+            <span>Loading items...</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((idx) => (
               <div
                 key={idx}
-                className="rounded-2xl bg-findit-card border border-findit-border overflow-hidden p-4 space-y-3 animate-pulse"
+                className="rounded-2xl bg-white border border-findit-border overflow-hidden p-4 space-y-3 animate-pulse shadow-card"
               >
                 <div className="aspect-[16/10] bg-findit-bg rounded-xl" />
                 <div className="h-4 bg-findit-bg rounded w-3/4" />
@@ -243,8 +231,8 @@ export const BrowsePage: React.FC = () => {
       ) : (
         <ItemGrid
           items={displayItems}
-          emptyTitle="No matching items found"
-          emptyDescription="We couldn't find any lost or found records matching your current filter criteria. Try resetting filters or searching with broader terms."
+          emptyTitle="We couldn't find a matching item."
+          emptyDescription="Try changing your search terms or clearing the filters above to see more items."
           emptyActionText="Clear All Filters"
           onEmptyAction={handleResetFilters}
         />

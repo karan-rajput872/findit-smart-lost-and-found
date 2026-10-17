@@ -113,28 +113,28 @@ export const ItemDetailsPage: React.FC = () => {
     return (
       <div className="text-center py-24 space-y-3">
         <RefreshCw className="w-7 h-7 animate-spin text-findit-primary mx-auto" />
-        <p className="text-sm font-semibold text-white">Loading item details...</p>
-        <p className="text-xs text-findit-muted">Retrieving verified report from the campus directory</p>
+        <p className="text-sm font-semibold text-findit-text">Loading item details...</p>
+        <p className="text-xs text-findit-muted">Retrieving listing from the campus directory</p>
       </div>
     );
   }
 
   if (notFound || !item) {
     return (
-      <div className="max-w-md mx-auto text-center py-20 px-6 rounded-2xl bg-findit-card border border-findit-border space-y-4 shadow-xl">
+      <div className="max-w-md mx-auto text-center py-20 px-6 rounded-3xl bg-white border border-findit-border space-y-4 shadow-card">
         <div className="w-12 h-12 rounded-2xl bg-findit-bg border border-findit-border text-findit-muted flex items-center justify-center mx-auto">
-          <AlertCircle className="w-6 h-6 text-amber-400" />
+          <AlertCircle className="w-6 h-6 text-[#996B26]" />
         </div>
-        <h2 className="text-xl font-bold text-white">Item Listing Not Found</h2>
+        <h2 className="text-xl font-bold text-findit-text">Item Not Found</h2>
         <p className="text-xs text-findit-muted leading-relaxed">
-          The item report <code className="text-findit-primary font-mono">{id}</code> could not be located in the current database. It may have been deleted, resolved, or the ID is invalid.
+          The item report <code className="text-findit-primary font-mono">{id}</code> could not be found. It may have already been returned, resolved, or removed.
         </p>
         <Link
           to="/dashboard/browse"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-findit-primary hover:bg-findit-primary-hover text-white shadow-glow-primary transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-findit-primary hover:bg-findit-primary-hover text-white shadow-subtle transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Browse Directory</span>
+          <span>Back to Browse Items</span>
         </Link>
       </div>
     );
@@ -159,7 +159,7 @@ export const ItemDetailsPage: React.FC = () => {
       return;
     }
     if (!proofDescription.trim()) {
-      setClaimError('Please provide private verification proof to support your claim.');
+      setClaimError('Please provide private verification details to identify your item.');
       return;
     }
 
@@ -180,7 +180,7 @@ export const ItemDetailsPage: React.FC = () => {
         setProofDescription('');
       }, 1800);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to submit claim request.';
+      const msg = err instanceof Error ? err.message : 'Failed to submit claim request. Please try again.';
       setClaimError(msg);
     } finally {
       setIsSubmittingClaim(false);
@@ -247,40 +247,40 @@ export const ItemDetailsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <Link
           to="/dashboard/browse"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-findit-muted hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-findit-muted hover:text-findit-text transition-colors min-h-[36px]"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Browse Directory</span>
+          <ArrowLeft className="w-4 h-4 text-findit-primary" />
+          <span>Back to Browse Items</span>
         </Link>
 
         <div className="flex items-center gap-2">
           {isOwner && (
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-findit-primary/15 text-findit-primary border border-findit-primary/30">
-              You own this listing
+            <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-findit-primary/10 text-findit-primary border border-findit-primary/25">
+              Your Report
             </span>
           )}
           <button
             onClick={handleCopyShare}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-findit-card border border-findit-border text-xs text-findit-muted hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-findit-border text-xs text-findit-text hover:bg-findit-secondary_bg transition-colors shadow-subtle min-h-[36px]"
           >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>{copiedNotice ? 'Link Copied!' : 'Share Listing'}</span>
+            <Share2 className="w-3.5 h-3.5 text-findit-primary" />
+            <span>{copiedNotice ? 'Link Copied!' : 'Share Item'}</span>
           </button>
         </div>
       </div>
 
       {statusMessage && (
-        <div className="p-3.5 rounded-xl bg-findit-primary/10 border border-findit-primary/30 text-xs text-findit-primary flex items-center justify-between">
+        <div className="p-3.5 rounded-xl bg-findit-found-bg border border-[#CEE0D0] text-xs text-[#2D593A] flex items-center justify-between">
           <span>{statusMessage}</span>
-          <button onClick={() => setStatusMessage(null)} className="font-bold text-white">✕</button>
+          <button onClick={() => setStatusMessage(null)} className="font-bold text-findit-text p-1">✕</button>
         </div>
       )}
 
       {/* Main Item Container */}
-      <div className="rounded-3xl bg-findit-card border border-findit-border overflow-hidden shadow-2xl">
+      <div className="rounded-3xl bg-white border border-findit-border overflow-hidden shadow-card">
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Image Side */}
-          <div className="relative aspect-[4/3] md:aspect-auto bg-findit-sidebar overflow-hidden min-h-[300px]">
+          <div className="relative aspect-[4/3] md:aspect-auto bg-findit-secondary_bg overflow-hidden min-h-[280px]">
             <ItemImage
               src={item.imageUrl}
               alt={item.title}
@@ -291,9 +291,9 @@ export const ItemDetailsPage: React.FC = () => {
             <div className="absolute top-4 left-4 flex items-center gap-2">
               <StatusBadge type={item.type} size="md" />
             </div>
-            <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-[11px] text-findit-muted flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-findit-secondary shrink-0" />
-              <span>Listing verified in campus directory.</span>
+            <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-white/95 backdrop-blur-md border border-findit-border text-[11px] text-findit-text flex items-center gap-2 shadow-subtle">
+              <ShieldCheck className="w-4 h-4 text-findit-primary shrink-0" />
+              <span>Verified listing in campus network.</span>
             </div>
           </div>
 
@@ -311,20 +311,20 @@ export const ItemDetailsPage: React.FC = () => {
                 <StatusBadge status={item.status} size="sm" />
               </div>
 
-              <h1 className="text-2xl font-black text-white tracking-tight">{item.title}</h1>
+              <h1 className="text-2xl font-black text-findit-text tracking-tight">{item.title}</h1>
 
-              <div className="space-y-2 py-3 border-y border-findit-border/60 text-xs text-findit-muted">
+              <div className="space-y-2 py-3 border-y border-findit-border/80 text-xs text-findit-muted">
                 <div className="flex items-center gap-2.5">
-                  <MapPin className="w-4 h-4 text-findit-secondary shrink-0" />
+                  <MapPin className="w-4 h-4 text-findit-primary shrink-0" />
                   <span className="font-medium text-findit-text">{item.location}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Calendar className="w-4 h-4 text-findit-primary shrink-0" />
-                  <span>Incident Date: {formatDate(item.date)} ({item.campus})</span>
+                  <span>Date: {formatDate(item.date)} ({item.campus})</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Clock className="w-4 h-4 text-findit-subtle shrink-0" />
-                  <span>Submitted: {formatDate(item.createdAt.slice(0, 10))}</span>
+                  <span>Reported on: {formatDate(item.createdAt.slice(0, 10))}</span>
                 </div>
               </div>
 
@@ -338,13 +338,13 @@ export const ItemDetailsPage: React.FC = () => {
               </div>
 
               {/* Public Reporter Info (Security-safe) */}
-              <div className="p-3.5 rounded-xl bg-findit-bg/80 border border-findit-border/80 space-y-1">
+              <div className="p-3.5 rounded-xl bg-findit-bg border border-findit-border space-y-1">
                 <div className="flex items-center gap-2 text-xs font-semibold text-findit-text">
                   <UserCheck className="w-4 h-4 text-findit-primary" />
                   <span>Reported by: {item.reporterName}</span>
                 </div>
                 {item.reporterContact && (
-                  <p className="text-[11px] text-findit-subtle pl-6">
+                  <p className="text-[11px] text-findit-muted pl-6">
                     Contact: {item.reporterContact}
                   </p>
                 )}
@@ -355,13 +355,13 @@ export const ItemDetailsPage: React.FC = () => {
             <div className="pt-4 border-t border-findit-border space-y-3">
               {['returned', 'resolved'].includes(item.status.toLowerCase()) ? (
                 /* Item is already resolved/returned */
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-1.5">
-                  <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold text-sm">
+                <div className="p-4 rounded-2xl bg-findit-found-bg border border-[#CEE0D0] text-center space-y-1.5">
+                  <div className="flex items-center justify-center gap-2 text-[#3E6B4A] font-bold text-sm">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Listing Resolved & Item Returned</span>
+                    <span>Successfully Returned</span>
                   </div>
-                  <p className="text-xs text-emerald-300/80">
-                    This item has been successfully verified and returned to its verified campus owner.
+                  <p className="text-xs text-[#4E7A5A]">
+                    This item has been safely returned to its verified campus owner.
                   </p>
                 </div>
               ) : isOwner ? (
@@ -371,7 +371,7 @@ export const ItemDetailsPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleOpenEdit}
-                      className="py-3 px-4 rounded-xl font-bold text-xs text-white bg-findit-primary hover:bg-findit-primary-hover shadow-glow-primary transition-all flex items-center justify-center gap-2"
+                      className="py-3 px-4 rounded-xl font-bold text-xs text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all flex items-center justify-center gap-2 min-h-[44px]"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit Listing</span>
@@ -379,7 +379,7 @@ export const ItemDetailsPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setDeleteModalOpen(true)}
-                      className="py-3 px-4 rounded-xl font-bold text-xs text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 transition-all flex items-center justify-center gap-2"
+                      className="py-3 px-4 rounded-xl font-bold text-xs text-findit-danger bg-findit-danger-bg hover:bg-findit-danger-bg/80 border border-findit-border transition-all flex items-center justify-center gap-2 min-h-[44px]"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete Listing</span>
@@ -388,10 +388,10 @@ export const ItemDetailsPage: React.FC = () => {
 
                   <Link
                     to="/dashboard/received-claims"
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-findit-primary hover:text-white bg-findit-primary/10 hover:bg-findit-primary border border-findit-primary/30 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-findit-text hover:text-findit-primary bg-findit-bg hover:bg-findit-secondary_bg border border-findit-border transition-all flex items-center justify-center gap-2 min-h-[42px]"
                   >
-                    <Inbox className="w-3.5 h-3.5" />
-                    <span>Review Received Claims for this Item</span>
+                    <Inbox className="w-3.5 h-3.5 text-findit-primary" />
+                    <span>Review Received Requests for this Item</span>
                   </Link>
 
                   <p className="text-[11px] text-center text-findit-subtle">
@@ -403,39 +403,39 @@ export const ItemDetailsPage: React.FC = () => {
                 <div className="space-y-2">
                   <Link
                     to="/login"
-                    className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-findit-primary hover:bg-findit-primary-hover shadow-glow-primary transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all flex items-center justify-center gap-2 min-h-[44px]"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>Sign in to Claim This Item</span>
                   </Link>
                   <p className="text-[11px] text-center text-findit-subtle">
-                    Registered campus members can verify ownership and coordinate returns.
+                    Registered campus members can verify ownership and coordinate safe returns.
                   </p>
                 </div>
               ) : activeUserClaim ? (
                 /* User already has an active claim */
-                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-2.5">
+                <div className="p-4 rounded-2xl bg-white border border-findit-border space-y-2.5 shadow-subtle">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-findit-primary flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4" />
-                      <span>You have an active claim</span>
+                      <span>You have an active request</span>
                     </span>
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 capitalize border border-blue-500/30">
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-findit-bg text-findit-text capitalize border border-findit-border">
                       {activeUserClaim.status.replace('_', ' ')}
                     </span>
                   </div>
                   <p className="text-xs text-findit-muted leading-relaxed">
-                    Your claim submitted on{' '}
-                    <strong className="text-white">
+                    Your request submitted on{' '}
+                    <strong className="text-findit-text">
                       {activeUserClaim.createdAt ? formatDate(activeUserClaim.createdAt) : 'Recently'}
                     </strong>{' '}
-                    is currently being processed. You will be notified once reviewed.
+                    is currently being reviewed. You will receive an update once checked.
                   </p>
                   <Link
                     to="/dashboard/my-claims"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-findit-primary hover:text-findit-primary-light transition-colors"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-findit-primary hover:underline transition-colors"
                   >
-                    <span>Track progress in My Claims &rarr;</span>
+                    <span>View in My Claims &rarr;</span>
                   </Link>
                 </div>
               ) : (
@@ -444,18 +444,18 @@ export const ItemDetailsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setClaimModalOpen(true)}
-                    className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-findit-primary to-findit-primary-hover hover:opacity-95 shadow-glow-primary transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all flex items-center justify-center gap-2 min-h-[44px]"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>
                       {item.type === 'found'
-                        ? 'Claim This Item (Prove Ownership)'
-                        : 'I Found This Item (Notify Reporter)'}
+                        ? 'Claim This Item (Prove It’s Yours)'
+                        : 'I Found This Item (Contact Owner)'}
                     </span>
                   </button>
                   <p className="text-[11px] text-center text-findit-subtle flex items-center justify-center gap-1">
-                    <Lock className="w-3 h-3" />
-                    <span>Private verification: identifying answers will never be displayed publicly.</span>
+                    <Lock className="w-3 h-3 text-findit-primary" />
+                    <span>Think this is yours? Submit a claim and tell us how you can identify it.</span>
                   </p>
                 </div>
               )}
@@ -477,18 +477,18 @@ export const ItemDetailsPage: React.FC = () => {
 
       {/* Owner Edit Modal Dialog */}
       {editModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-lg p-6 sm:p-7 rounded-2xl bg-findit-card border border-findit-border shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-lg p-6 sm:p-7 rounded-3xl bg-white border border-findit-border shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-findit-primary">
-                  Owner Management
+                  Manage Listing
                 </span>
-                <h3 className="text-lg font-bold text-white mt-0.5">Edit Listing Details</h3>
+                <h3 className="text-lg font-bold text-findit-text mt-0.5">Edit Details</h3>
               </div>
               <button
                 onClick={() => setEditModalOpen(false)}
-                className="text-findit-muted hover:text-white p-1"
+                className="text-findit-muted hover:text-findit-text p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 ✕
               </button>
@@ -536,23 +536,23 @@ export const ItemDetailsPage: React.FC = () => {
 
               <div className="space-y-1.5 text-left">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-findit-muted">
-                  Listing Status
+                  Status
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { value: 'open', label: 'Open' },
+                    { value: 'open', label: 'Active' },
                     { value: 'matched', label: 'Matched' },
                     { value: 'returned', label: 'Returned' },
                     { value: 'closed', label: 'Closed' },
-                    { value: 'pending_verification', label: 'Claim Pending' },
+                    { value: 'pending_verification', label: 'Under Review' },
                     { value: 'resolved', label: 'Resolved' },
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className={`flex items-center gap-2 p-2 rounded-xl border cursor-pointer text-xs transition-colors ${
+                      className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer text-xs transition-colors ${
                         editStatus === option.value
-                          ? 'bg-findit-primary/15 border-findit-primary text-white font-semibold'
-                          : 'bg-findit-bg border-findit-border text-findit-muted hover:border-findit-border-light'
+                          ? 'bg-findit-primary/10 border-findit-primary text-findit-primary font-bold'
+                          : 'bg-white border-findit-border text-findit-muted hover:border-findit-primary'
                       }`}
                     >
                       <input
@@ -569,19 +569,19 @@ export const ItemDetailsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-findit-border/60">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-findit-border">
                 <button
                   type="button"
                   onClick={() => setEditModalOpen(false)}
                   disabled={isSavingEdit}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-findit-border text-findit-muted hover:text-white"
+                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-findit-border text-findit-muted hover:text-findit-text min-h-[38px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingEdit}
-                  className="px-5 py-2 text-xs font-bold rounded-xl text-white bg-findit-primary hover:bg-findit-primary-hover shadow-glow-primary transition-all disabled:opacity-50"
+                  className="px-5 py-2 text-xs font-bold rounded-xl text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all disabled:opacity-50 min-h-[38px]"
                 >
                   {isSavingEdit ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -593,46 +593,46 @@ export const ItemDetailsPage: React.FC = () => {
 
       {/* Claim Modal Dialog */}
       {claimModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-lg p-6 sm:p-7 rounded-2xl bg-findit-card border border-findit-border shadow-2xl relative space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-lg p-6 sm:p-7 rounded-3xl bg-white border border-findit-border shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-findit-primary">
-                  Ownership Verification
+                  Prove It’s Yours
                 </span>
-                <h3 className="text-xl font-bold text-white mt-1">Submit Claim for: {item.title}</h3>
+                <h3 className="text-xl font-bold text-findit-text mt-1">Claim: {item.title}</h3>
               </div>
               <button
                 onClick={() => setClaimModalOpen(false)}
-                className="text-findit-muted hover:text-white p-1"
+                className="text-findit-muted hover:text-findit-text p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
               >
                 ✕
               </button>
             </div>
 
             {claimSuccess ? (
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-                <h4 className="text-base font-bold text-white">Ownership Claim Submitted!</h4>
-                <p className="text-xs text-emerald-300/90 leading-relaxed">
-                  Your private verification proof has been forwarded to campus moderation.
+              <div className="p-6 rounded-2xl bg-findit-found-bg border border-[#CEE0D0] text-center space-y-2">
+                <CheckCircle2 className="w-10 h-10 text-[#3E6B4A] mx-auto" />
+                <h4 className="text-base font-bold text-findit-text">Your request has been submitted!</h4>
+                <p className="text-xs text-findit-muted leading-relaxed">
+                  We'll keep you updated. The reporter or campus staff will review your details soon.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleClaimSubmit} className="space-y-4">
-                <div className="p-3.5 rounded-xl bg-findit-bg/80 border border-findit-border text-xs text-findit-muted space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-findit-bg border border-findit-border text-xs text-findit-muted space-y-1.5">
                   <div className="flex items-center gap-1.5 text-findit-text font-semibold">
-                    <Lock className="w-3.5 h-3.5 text-findit-secondary" />
-                    <span>How Claim Verification Works</span>
+                    <Lock className="w-3.5 h-3.5 text-findit-primary" />
+                    <span>How Verification Works</span>
                   </div>
-                  <p className="text-[11px] text-findit-subtle leading-relaxed">
-                    To prevent fraudulent pickup, describe private details not visible in photos (e.g. wallpaper picture, specific scratches, contents of inner pockets, or matching serial digits).
+                  <p className="text-[11px] text-findit-muted leading-relaxed">
+                    To make sure the item goes to the real owner, describe details not visible in photos (such as a lockscreen wallpaper, stickers on the back, or what was inside).
                   </p>
                 </div>
 
                 <div className="space-y-1.5 text-left">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-findit-muted">
-                    Claim Explanation / Circumstances <span className="text-red-400">*</span>
+                    When and where did you lose it? <span className="text-findit-danger">*</span>
                   </label>
                   <textarea
                     rows={2}
@@ -641,16 +641,16 @@ export const ItemDetailsPage: React.FC = () => {
                       setClaimReason(e.target.value);
                       setClaimError('');
                     }}
-                    placeholder="Describe when and where you lost this item and why you believe it is yours..."
+                    placeholder="e.g. I left it on the 2nd floor library desk on Tuesday around 3 PM..."
                     className="w-full px-4 py-2.5 rounded-xl bg-findit-bg border border-findit-border text-sm text-findit-text placeholder-findit-subtle focus:border-findit-primary focus:ring-1 focus:ring-findit-primary outline-none resize-none"
                     required
                   />
                 </div>
 
                 <div className="space-y-1.5 text-left">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>Private Proof of Ownership (Confidential)</span> <span className="text-red-400">*</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-findit-text flex items-center gap-1.5 font-bold">
+                    <Lock className="w-3.5 h-3.5 text-findit-primary" />
+                    <span>Identifying Details (Kept Private)</span> <span className="text-findit-danger">*</span>
                   </label>
                   <textarea
                     rows={3}
@@ -659,12 +659,12 @@ export const ItemDetailsPage: React.FC = () => {
                       setProofDescription(e.target.value);
                       setClaimError('');
                     }}
-                    placeholder="e.g. My student card ending in 4421 is inside the hidden pouch, or the device phone lockscreen is a picture of my dog..."
+                    placeholder="Describe a sticker, scratch, lockscreen image, engraving, or specific item inside..."
                     className="w-full px-4 py-2.5 rounded-xl bg-findit-bg border border-findit-border text-sm text-findit-text placeholder-findit-subtle focus:border-findit-primary focus:ring-1 focus:ring-findit-primary outline-none resize-none"
                     required
                   />
                   {claimError && (
-                    <p className="text-xs text-findit-danger flex items-center gap-1 pt-1">
+                    <p className="text-xs text-findit-danger flex items-center gap-1 pt-1 font-medium">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{claimError}</span>
                     </p>
@@ -676,17 +676,17 @@ export const ItemDetailsPage: React.FC = () => {
                     type="button"
                     onClick={() => setClaimModalOpen(false)}
                     disabled={isSubmittingClaim}
-                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-findit-border text-findit-muted hover:text-white"
+                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-findit-border text-findit-muted hover:text-findit-text min-h-[38px]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingClaim}
-                    className="px-5 py-2.5 text-xs font-bold rounded-xl text-white bg-findit-primary hover:bg-findit-primary-hover shadow-glow-primary transition-all disabled:opacity-50 flex items-center gap-1.5"
+                    className="px-5 py-2.5 text-xs font-bold rounded-xl text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all disabled:opacity-50 flex items-center gap-1.5 min-h-[38px]"
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    <span>{isSubmittingClaim ? 'Submitting Claim...' : 'Submit Claim Request'}</span>
+                    <span>{isSubmittingClaim ? 'Submitting...' : 'Claim This Item'}</span>
                   </button>
                 </div>
               </form>

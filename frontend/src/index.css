@@ -4,17 +4,15 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
   
   body {
-    background-color: #0B0D12;
-    color: #F5F6FA;
+    background-color: #F8F6F0;
+    color: #26332B;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -32,7 +30,7 @@
 input,
 textarea,
 [contenteditable="true"] {
-  caret-color: #8B7CFF !important;
+  caret-color: #6F8B74 !important;
   -webkit-user-select: text !important;
   -moz-user-select: text !important;
   -ms-user-select: text !important;
@@ -60,51 +58,54 @@ h4:focus {
 
 button:focus-visible,
 a:focus-visible,
-[role="button"]:focus-visible {
-  outline: 2px solid rgba(139, 124, 255, 0.6) !important;
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #6F8B74 !important;
   outline-offset: 2px;
 }
 
-/* Custom sleek scrollbar */
+/* Custom sleek warm scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0D12;
+  background: #F8F6F0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #242C3F;
+  background: #DDD7CB;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3B4764;
+  background: #C7C0B2;
 }
 
-/* Glassmorphism and Card Accents */
+/* Glass and Surface Styling */
 .glass-panel {
-  background: rgba(23, 28, 39, 0.75);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(36, 44, 63, 0.8);
+  border: 1px solid #E7E1D6;
 }
 
 .glass-nav {
-  background: rgba(11, 13, 18, 0.85);
+  background: rgba(248, 246, 240, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(36, 44, 63, 0.6);
+  border-bottom: 1px solid #E7E1D6;
 }
 
 .card-hover {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(139, 124, 255, 0.4);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(139, 124, 255, 0.15);
+  border-color: #C8D8CC;
+  box-shadow: 0 10px 24px -5px rgba(38, 51, 43, 0.08), 0 2px 6px -2px rgba(38, 51, 43, 0.04);
 }

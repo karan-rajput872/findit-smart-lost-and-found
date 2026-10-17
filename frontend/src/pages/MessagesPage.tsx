@@ -143,34 +143,34 @@ export const MessagesPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-bold text-findit-text tracking-tight flex items-center gap-2.5">
             <MessageSquare className="w-6 h-6 text-findit-primary" />
             <span>Messages & Return Coordination</span>
           </h1>
-          <p className="text-xs text-findit-subtle mt-0.5">
+          <p className="text-xs text-findit-muted mt-0.5">
             Coordinate safe returns with verified item finders and owners.
           </p>
         </div>
       </div>
 
       {/* Main Container */}
-      <div className="flex-1 min-h-0 bg-findit-surface border border-findit-border rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+      <div className="flex-1 min-h-0 bg-white border border-findit-border rounded-2xl shadow-subtle overflow-hidden flex flex-col md:flex-row">
         {/* Left Pane: Conversation List */}
         <div
-          className={`w-full md:w-80 lg:w-96 border-r border-findit-border flex flex-col bg-findit-card/40 shrink-0 ${
+          className={`w-full md:w-80 lg:w-96 border-r border-findit-border flex flex-col bg-white shrink-0 ${
             showMobileChat ? 'hidden md:flex' : 'flex'
           }`}
         >
           {/* Search Header */}
-          <div className="p-3.5 border-b border-findit-border">
+          <div className="p-3.5 border-b border-findit-border bg-findit-bg">
             <div className="relative">
-              <Search className="w-4 h-4 text-findit-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-findit-muted absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-findit-surface border border-findit-border rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder-findit-subtle/70 focus:border-findit-primary focus:outline-none focus:ring-1 focus:ring-findit-primary"
+                className="w-full bg-white border border-findit-border rounded-xl pl-9 pr-3.5 py-2 text-xs text-findit-text placeholder-findit-muted focus:border-findit-primary focus:outline-none focus:ring-1 focus:ring-findit-primary min-h-[40px]"
               />
             </div>
           </div>
@@ -178,14 +178,14 @@ export const MessagesPage: React.FC = () => {
           {/* List Stream */}
           <div className="flex-1 overflow-y-auto divide-y divide-findit-border/60">
             {isLoadingConvs ? (
-              <div className="p-8 text-center text-xs text-findit-subtle flex flex-col items-center gap-2">
+              <div className="p-8 text-center text-xs text-findit-muted flex flex-col items-center gap-2">
                 <RefreshCw className="w-5 h-5 animate-spin text-findit-primary" />
                 <span>Loading active channels...</span>
               </div>
             ) : filteredConversations.length === 0 ? (
-              <div className="p-8 text-center text-xs text-findit-subtle space-y-2">
-                <Inbox className="w-8 h-8 text-findit-subtle/50 mx-auto" />
-                <p className="font-medium text-white">No active conversations</p>
+              <div className="p-8 text-center text-xs text-findit-muted space-y-2">
+                <Inbox className="w-8 h-8 text-findit-muted/50 mx-auto" />
+                <p className="font-semibold text-findit-text">No active conversations</p>
                 <p className="text-[11px] text-findit-muted">
                   Conversations unlock automatically when a claim is approved by the finder.
                 </p>
@@ -201,20 +201,20 @@ export const MessagesPage: React.FC = () => {
                     className={`w-full p-3.5 text-left flex items-start gap-3 transition-colors ${
                       isSelected
                         ? 'bg-findit-primary/10 border-l-4 border-l-findit-primary'
-                        : 'hover:bg-findit-card/80'
+                        : 'hover:bg-findit-bg'
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-findit-card border border-findit-border flex items-center justify-center text-findit-primary font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-findit-bg border border-findit-border flex items-center justify-center text-findit-primary font-bold text-sm shrink-0">
                       {conv.otherPartyName.charAt(0).toUpperCase()}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 mb-0.5">
-                        <span className="text-xs font-bold text-white truncate">
+                        <span className="text-xs font-bold text-findit-text truncate">
                           {conv.otherPartyName}
                         </span>
                         {conv.lastMessageTime && (
-                          <span className="text-[10px] text-findit-subtle shrink-0">
+                          <span className="text-[10px] text-findit-muted shrink-0">
                             {new Date(conv.lastMessageTime).toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit',
@@ -223,7 +223,7 @@ export const MessagesPage: React.FC = () => {
                         )}
                       </div>
 
-                      <p className="text-[11px] font-medium text-findit-primary truncate mb-1">
+                      <p className="text-[11px] font-semibold text-findit-primary truncate mb-1">
                         {conv.itemTitle}
                       </p>
 
@@ -247,39 +247,39 @@ export const MessagesPage: React.FC = () => {
 
         {/* Right Pane: Active Chat Room */}
         <div
-          className={`flex-1 flex flex-col bg-findit-bg/20 min-w-0 ${
+          className={`flex-1 flex flex-col bg-[#FAF9F5] min-w-0 ${
             showMobileChat ? 'flex' : 'hidden md:flex'
           }`}
         >
           {activeConv ? (
             <>
               {/* Room Header */}
-              <div className="p-3.5 px-4 sm:px-5 border-b border-findit-border bg-findit-card/70 flex items-center justify-between gap-3 shrink-0">
+              <div className="p-3.5 px-4 sm:px-5 border-b border-findit-border bg-white flex items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <button
                     type="button"
                     onClick={() => setShowMobileChat(false)}
-                    className="p-1 rounded-lg text-findit-subtle hover:text-white md:hidden"
+                    className="p-1.5 rounded-lg text-findit-muted hover:text-findit-text md:hidden min-h-[36px] min-w-[36px] flex items-center justify-center"
                     aria-label="Back to conversations"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
 
-                  <div className="w-10 h-10 rounded-xl bg-findit-primary/15 border border-findit-primary/30 flex items-center justify-center text-findit-primary font-bold text-sm shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-findit-primary/15 border border-findit-primary/25 flex items-center justify-center text-findit-primary font-bold text-sm shrink-0">
                     {activeConv.otherPartyName.charAt(0).toUpperCase()}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-bold text-white truncate">
+                      <h2 className="text-sm font-bold text-findit-text truncate">
                         {activeConv.otherPartyName}
                       </h2>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E5EFE6] text-[#3E6B4A] border border-[#CDE1CE]">
                         {activeConv.claimStatus}
                       </span>
                     </div>
-                    <p className="text-xs text-findit-subtle truncate">
-                      Item: <span className="text-white font-medium">{activeConv.itemTitle}</span>
+                    <p className="text-xs text-findit-muted truncate">
+                      Item: <span className="text-findit-text font-semibold">{activeConv.itemTitle}</span>
                     </p>
                   </div>
                 </div>
@@ -291,7 +291,7 @@ export const MessagesPage: React.FC = () => {
                       href={contactInfo.whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#25D366]/15 text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/25 transition-all shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-xl text-xs font-bold bg-[#25D366]/15 text-[#1E7D43] border border-[#25D366]/30 hover:bg-[#25D366]/25 transition-all shadow-subtle"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">WhatsApp</span>
@@ -302,7 +302,7 @@ export const MessagesPage: React.FC = () => {
                   {contactInfo?.mutualConsent && contactInfo.phoneNumber && (
                     <a
                       href={`tel:${contactInfo.phoneNumber}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-findit-card text-white border border-findit-border hover:border-findit-primary transition-all shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-xl text-xs font-bold bg-white text-findit-text border border-findit-border hover:border-findit-primary transition-all shadow-subtle"
                     >
                       <Phone className="w-3.5 h-3.5 text-findit-primary" />
                       <span className="hidden sm:inline">Call</span>
@@ -312,17 +312,17 @@ export const MessagesPage: React.FC = () => {
               </div>
 
               {/* Status / Privacy Banner */}
-              <div className="py-2 px-4 bg-findit-card/30 border-b border-findit-border/60 flex items-center justify-between text-xs text-findit-subtle shrink-0">
+              <div className="py-2 px-4 bg-findit-bg border-b border-findit-border flex items-center justify-between text-xs text-findit-muted shrink-0">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-findit-primary" />
                   <span>Internal FindIt Return Coordination</span>
                 </span>
                 {contactInfo?.mutualConsent ? (
-                  <span className="text-emerald-400 font-semibold text-[11px]">
+                  <span className="text-[#3E6B4A] font-semibold text-[11px]">
                     Mutual Consent Active
                   </span>
                 ) : (
-                  <span className="text-findit-subtle text-[11px] flex items-center gap-1">
+                  <span className="text-findit-muted text-[11px] flex items-center gap-1">
                     <Lock className="w-3 h-3" />
                     Mutual consent required for phone numbers
                   </span>
@@ -332,16 +332,16 @@ export const MessagesPage: React.FC = () => {
               {/* Chat Message Stream */}
               <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 min-h-0">
                 {isLoadingMsgs ? (
-                  <div className="h-full flex flex-col items-center justify-center gap-2 text-findit-subtle">
+                  <div className="h-full flex flex-col items-center justify-center gap-2 text-findit-muted">
                     <RefreshCw className="w-5 h-5 animate-spin text-findit-primary" />
                     <span className="text-xs">Loading messages...</span>
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-6 max-w-sm mx-auto">
-                    <div className="w-12 h-12 rounded-2xl bg-findit-card border border-findit-border flex items-center justify-center text-findit-primary mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white border border-findit-border shadow-subtle flex items-center justify-center text-findit-primary mb-3">
                       <MessageSquare className="w-6 h-6" />
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-1">
+                    <h3 className="text-sm font-bold text-findit-text mb-1">
                       No messages yet
                     </h3>
                     <p className="text-xs text-findit-muted mb-4 leading-relaxed">
@@ -362,18 +362,18 @@ export const MessagesPage: React.FC = () => {
                         className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} animate-fadeIn`}
                       >
                         <div className="flex items-baseline gap-1.5 mb-1 px-1">
-                          <span className="text-[11px] font-semibold text-findit-subtle">
+                          <span className="text-[11px] font-semibold text-findit-text">
                             {isMine ? 'You' : msg.senderName}
                           </span>
-                          <span className="text-[10px] text-findit-subtle/70">
+                          <span className="text-[10px] text-findit-muted">
                             {timeFormatted}
                           </span>
                         </div>
                         <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed break-words shadow-sm ${
+                          className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed break-words shadow-subtle ${
                             isMine
                               ? 'bg-findit-primary text-white rounded-tr-xs'
-                              : 'bg-findit-card border border-findit-border text-findit-text rounded-tl-xs'
+                              : 'bg-white border border-findit-border text-findit-text rounded-tl-xs'
                           }`}
                         >
                           {msg.content}
@@ -386,7 +386,7 @@ export const MessagesPage: React.FC = () => {
               </div>
 
               {/* Message Input Bar */}
-              <div className="p-3 sm:p-4 border-t border-findit-border bg-findit-card/80 shrink-0">
+              <div className="p-3 sm:p-4 border-t border-findit-border bg-white shrink-0">
                 <form onSubmit={handleSendMessage} className="flex items-end gap-2.5">
                   <textarea
                     value={inputText}
@@ -394,12 +394,13 @@ export const MessagesPage: React.FC = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
                     rows={1}
-                    className="flex-1 max-h-28 min-h-[42px] bg-findit-surface border border-findit-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-findit-subtle/70 focus:border-findit-primary focus:outline-none focus:ring-1 focus:ring-findit-primary resize-none transition-all"
+                    className="flex-1 max-h-28 min-h-[44px] bg-white border border-findit-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-findit-text placeholder-findit-muted focus:border-findit-primary focus:outline-none focus:ring-1 focus:ring-findit-primary resize-none transition-all"
                   />
                   <button
                     type="submit"
                     disabled={!inputText.trim() || isSending}
-                    className="h-[42px] px-5 rounded-xl font-bold text-xs text-white bg-findit-primary hover:bg-findit-primary-light disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-findit-primary/25 shrink-0"
+                    className="h-[44px] px-5 rounded-xl font-bold text-xs text-white bg-findit-primary hover:bg-findit-primary-hover disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 shadow-subtle shrink-0"
+                    aria-label="Send message"
                   >
                     <span>Send</span>
                     <Send className="w-3.5 h-3.5" />
@@ -408,13 +409,13 @@ export const MessagesPage: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center p-8 text-center text-findit-subtle">
-              <MessageSquare className="w-12 h-12 text-findit-subtle/40 mb-3" />
-              <h3 className="text-base font-bold text-white mb-1">
-                Select a conversation
-              </h3>
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center text-findit-muted space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-white border border-findit-border shadow-subtle flex items-center justify-center text-findit-primary">
+                <MessageSquare className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-findit-text">Select a conversation</h3>
               <p className="text-xs text-findit-muted max-w-sm">
-                Choose an item claim from the sidebar to view return messages or coordinate handover.
+                Choose a claim channel from the left panel to coordinate handover details and safe meeting times.
               </p>
             </div>
           )}

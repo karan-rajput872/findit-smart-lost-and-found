@@ -26,7 +26,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { user, notifications, myClaims, receivedClaims, logout, isAuthenticated, unreadNotifCount, unreadMessagesCount } = useApp();
+  const { user, notifications, myClaims, receivedClaims, logout, unreadNotifCount, unreadMessagesCount } = useApp();
   const effectiveUnread = unreadNotifCount > 0 ? unreadNotifCount : notifications.filter((n) => !n.isRead && !n.read).length;
 
   const handleLogout = async () => {
@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       icon: MessageSquare,
       count: unreadMessagesCount > 0 ? unreadMessagesCount : undefined,
     },
-    { label: 'AI Matches', path: '/dashboard/ai-matches', icon: Sparkles, badge: 'Prototype' },
+    { label: 'Smart Suggestions', path: '/dashboard/ai-matches', icon: Sparkles },
     { label: 'Notifications', path: '/dashboard/notifications', icon: Bell, count: effectiveUnread },
     ...(user.role === 'admin'
       ? [{ label: 'Admin Portal', path: '/admin', icon: ShieldAlert, badge: 'Admin' }]
@@ -77,7 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <BrandLogo size="sm" showTagline={false} linkTo="/dashboard" />
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-findit-muted hover:text-white hover:bg-findit-card lg:hidden"
+            className="p-2 rounded-xl text-findit-muted hover:text-findit-text hover:bg-white lg:hidden min-w-[40px] min-h-[40px] flex items-center justify-center"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Sidebar Menu">
           <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-findit-subtle">
             Menu
           </div>
@@ -116,75 +116,68 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 if (window.innerWidth < 1024) onClose();
               }}
               className={({ isActive }) =>
-                `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all min-h-[40px] ${
                   isActive
-                    ? 'bg-findit-primary/15 text-findit-primary border border-findit-primary/30 shadow-sm'
+                    ? 'bg-white text-findit-primary font-bold shadow-subtle border border-findit-border'
                     : item.highlight
-                    ? 'text-findit-secondary hover:bg-findit-secondary/10 hover:text-white'
-                    : 'text-findit-muted hover:text-findit-text hover:bg-findit-card'
+                    ? 'text-findit-primary hover:bg-white hover:text-findit-primary-hover'
+                    : 'text-findit-text hover:text-findit-primary hover:bg-white/70'
                 }`
               }
             >
               <div className="flex items-center gap-3">
-                <item.icon className="w-4 h-4 shrink-0" />
+                <item.icon className="w-4 h-4 shrink-0 text-findit-primary" />
                 <span>{item.label}</span>
               </div>
 
               {item.badge && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-findit-bg border border-findit-border/80 text-findit-muted font-normal">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-findit-border text-findit-muted font-normal">
                   {item.badge}
                 </span>
               )}
 
               {item.count !== undefined && item.count > 0 && (
                 <span className="w-5 h-5 rounded-full bg-findit-primary text-white text-[11px] font-bold flex items-center justify-center">
-                  {item.count}
+                  {item.count > 9 ? '9+' : item.count}
                 </span>
               )}
             </NavLink>
           ))}
-
-          <div className="pt-4 mt-4 border-t border-findit-border/60">
-            <NavLink
-              to="/"
-              className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-findit-muted hover:text-findit-text hover:bg-findit-card transition-colors"
-            >
-              <Home className="w-4 h-4" />
-              <span>Public Landing Page</span>
-            </NavLink>
-          </div>
         </nav>
 
-        {/* User Profile Footer */}
-        <div className="p-4 border-t border-findit-border bg-findit-bg/40 space-y-2">
-          <div className="flex items-center gap-3">
-            <img
-              src={user.avatarUrl || getAvatarFallback(user.fullName)}
-              alt={user.fullName}
-              className="w-9 h-9 rounded-xl object-cover border border-findit-border/80 shrink-0"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = getAvatarFallback(user.fullName);
-              }}
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-findit-text truncate">{user.fullName}</p>
-              <p className="text-[11px] text-findit-muted truncate">{user.campus}</p>
+        {/* User Card & Logout Footer */}
+        <div className="p-3 border-t border-findit-border bg-white/50 space-y-2">
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-white border border-findit-border shadow-subtle">
+            <div className="w-9 h-9 rounded-full bg-findit-primary/15 text-findit-primary font-bold text-xs flex items-center justify-center shrink-0 border border-findit-primary/25">
+              {getAvatarFallback(user.fullName)}
             </div>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-findit-card border border-findit-border text-findit-primary">
-              {isAuthenticated ? user.role.toUpperCase() : 'DEMO'}
-            </span>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-xs font-bold text-findit-text truncate">{user.fullName}</p>
+              <p className="text-[10px] text-findit-subtle truncate capitalize">
+                {user.role} • {user.campus || 'Campus'}
+              </p>
+            </div>
           </div>
 
-          {isAuthenticated && (
+          <div className="flex items-center gap-1.5">
+            <NavLink
+              to="/"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold text-findit-muted hover:text-findit-text hover:bg-white border border-findit-border transition-colors min-h-[38px]"
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>Home</span>
+            </NavLink>
+
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-lg text-xs font-medium text-findit-muted hover:text-findit-danger hover:bg-findit-danger/10 border border-findit-border hover:border-findit-danger/30 transition-colors"
-              title="Sign out of your session"
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold text-findit-danger hover:bg-findit-danger-bg border border-findit-border transition-colors min-h-[38px]"
+              title="Sign Out"
+              aria-label="Sign out of account"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
+              <span>Exit</span>
             </button>
-          )}
+          </div>
         </div>
       </aside>
     </>

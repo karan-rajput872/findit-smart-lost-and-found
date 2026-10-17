@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { getAvatarFallback } from '../../utils/imageUtils';
+import { formatDate } from '../../utils/formatters';
 import { ContactSettingsModal } from '../ContactSettingsModal';
 
 interface HeaderProps {
@@ -67,31 +68,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
     switch ((type || '').toLowerCase()) {
       case 'claim_approved':
       case 'item_returned':
-        return <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />;
+        return <CheckCircle2 className="w-4 h-4 text-[#3E6B4A] shrink-0" />;
       case 'claim_rejected':
-        return <XCircle className="w-4 h-4 text-red-400 shrink-0" />;
+        return <XCircle className="w-4 h-4 text-[#A84A42] shrink-0" />;
       case 'claim_under_review':
-        return <Clock className="w-4 h-4 text-blue-400 shrink-0" />;
+        return <Clock className="w-4 h-4 text-[#4A6478] shrink-0" />;
       case 'claim_submitted':
-        return <FileText className="w-4 h-4 text-amber-400 shrink-0" />;
+        return <FileText className="w-4 h-4 text-[#8F6325] shrink-0" />;
       case 'handover_arranged':
-        return <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />;
+        return <Sparkles className="w-4 h-4 text-findit-primary shrink-0" />;
       case 'new_message':
         return <MessageSquare className="w-4 h-4 text-findit-primary shrink-0" />;
       case 'contact_shared':
-        return <Smartphone className="w-4 h-4 text-emerald-400 shrink-0" />;
+        return <Smartphone className="w-4 h-4 text-[#3E6B4A] shrink-0" />;
       default:
         return <Bell className="w-4 h-4 text-findit-primary shrink-0" />;
     }
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-findit-bg/85 backdrop-blur-md border-b border-findit-border px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+    <header className="sticky top-0 z-30 h-16 bg-[#F8F6F0]/90 backdrop-blur-md border-b border-findit-border px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
       {/* Left: Mobile Toggle & Quick Search */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={onOpenSidebar}
-          className="p-2 rounded-xl text-findit-muted hover:text-white hover:bg-findit-card lg:hidden border border-findit-border"
+          className="p-2 rounded-xl text-findit-text bg-white border border-findit-border hover:bg-findit-secondary_bg lg:hidden min-w-[42px] min-h-[42px] flex items-center justify-center shadow-subtle"
           aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />
@@ -99,18 +100,18 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
 
         <Link
           to="/dashboard/browse"
-          className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-findit-card/80 border border-findit-border text-xs text-findit-muted hover:text-findit-text hover:border-findit-primary/40 transition-all w-64"
+          className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white border border-findit-border text-xs text-findit-muted hover:text-findit-text hover:border-findit-primary transition-all w-52 md:w-64 shadow-subtle"
         >
           <Search className="w-3.5 h-3.5 text-findit-subtle" />
-          <span>Quick search directory...</span>
+          <span>Search items...</span>
         </Link>
       </div>
 
       {/* Right: Actions, Notification Dropdown & User Badge */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Link
           to="/dashboard/report"
-          className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-findit-primary hover:bg-findit-primary-hover shadow-glow-primary transition-all"
+          className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-findit-primary hover:bg-findit-primary-hover shadow-subtle transition-all"
         >
           <PlusCircle className="w-3.5 h-3.5" />
           <span>Report Item</span>
@@ -121,17 +122,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
           <button
             type="button"
             onClick={() => setPanelOpen(!panelOpen)}
-            className={`relative p-2 rounded-xl border transition-all ${
+            className={`relative p-2 rounded-xl border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center ${
               panelOpen
-                ? 'bg-findit-card text-white border-findit-primary shadow-glow-primary'
-                : 'bg-findit-card border-findit-border text-findit-muted hover:text-white hover:border-findit-border-light'
+                ? 'bg-findit-primary/10 text-findit-primary border-findit-primary'
+                : 'bg-white border-findit-border text-findit-text hover:bg-findit-secondary_bg shadow-subtle'
             }`}
             aria-label="Notifications"
             aria-expanded={panelOpen}
           >
             <Bell className="w-4 h-4" />
             {effectiveUnread > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-findit-primary text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-findit-primary text-white text-[10px] font-bold flex items-center justify-center shadow-subtle">
                 {effectiveUnread > 9 ? '9+' : effectiveUnread}
               </span>
             )}
@@ -139,12 +140,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
 
           {/* Notification Dropdown Panel */}
           {panelOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-findit-sidebar border border-findit-border shadow-2xl z-50 animate-fade-in overflow-hidden">
-              <div className="p-3.5 px-4 border-b border-findit-border flex items-center justify-between bg-findit-card/60">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white border border-findit-border shadow-card z-50 animate-fade-in overflow-hidden">
+              <div className="p-3.5 px-4 border-b border-findit-border flex items-center justify-between bg-findit-bg/60">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Notifications</h4>
+                  <h4 className="text-xs font-bold text-findit-text uppercase tracking-wider">Notifications</h4>
                   {effectiveUnread > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-findit-primary/20 text-findit-primary border border-findit-primary/30">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-findit-primary/15 text-findit-primary border border-findit-primary/25">
                       {effectiveUnread} new
                     </span>
                   )}
@@ -152,9 +153,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
 
                 {effectiveUnread > 0 && (
                   <button
-                    type="button"
-                    onClick={() => markAllNotificationsAsRead()}
-                    className="text-[11px] font-semibold text-findit-primary hover:text-findit-primary-light flex items-center gap-1 transition-colors"
+                    onClick={markAllNotificationsAsRead}
+                    className="text-[11px] font-semibold text-findit-primary hover:underline flex items-center gap-1"
                   >
                     <CheckCheck className="w-3 h-3" />
                     <span>Mark all read</span>
@@ -162,102 +162,92 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar }) => {
                 )}
               </div>
 
-              {/* Notification list */}
-              <div className="max-h-80 overflow-y-auto divide-y divide-findit-border/40">
+              {/* Notification Items List */}
+              <div className="max-h-80 overflow-y-auto divide-y divide-findit-border/60">
                 {recentNotifications.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-findit-muted">
-                    <p>No notifications yet.</p>
-                    <p className="text-[11px] text-findit-subtle mt-1">Updates on claims and returns will appear here.</p>
+                  <div className="p-6 text-center text-xs text-findit-muted space-y-1">
+                    <p className="font-semibold text-findit-text">You're all caught up!</p>
+                    <p>No new notifications right now.</p>
                   </div>
                 ) : (
                   recentNotifications.map((notif) => {
                     const isUnread = !notif.isRead && !notif.read;
-                    const timeStr = notif.createdAt || notif.timestamp || '';
-                    const timeAgo = timeStr ? new Date(timeStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now';
-
                     return (
                       <div
                         key={notif.id}
                         onClick={() => handleNotificationClick(notif.id, notif.link)}
-                        className={`p-3.5 px-4 transition-colors cursor-pointer flex items-start gap-3 hover:bg-findit-card/80 ${
-                          isUnread ? 'bg-findit-primary/5' : ''
+                        className={`p-3.5 px-4 text-left transition-colors cursor-pointer flex items-start gap-3 ${
+                          isUnread
+                            ? 'bg-findit-primary/5 hover:bg-findit-primary/10'
+                            : 'hover:bg-findit-bg/80'
                         }`}
                       >
-                        <div className="mt-0.5">
-                          {getNotificationIcon(notif.notificationType || notif.type)}
-                        </div>
-
-                        <div className="flex-1 min-w-0 space-y-0.5">
+                        <div className="mt-0.5">{getNotificationIcon(notif.type)}</div>
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
-                            <p className={`text-xs font-bold truncate ${isUnread ? 'text-white' : 'text-findit-text'}`}>
+                            <p
+                              className={`text-xs font-semibold truncate ${
+                                isUnread ? 'text-findit-text font-bold' : 'text-findit-muted'
+                              }`}
+                            >
                               {notif.title}
                             </p>
-                            <span className="text-[10px] text-findit-subtle shrink-0">{timeAgo}</span>
+                            <span className="text-[10px] text-findit-muted shrink-0">
+                              {notif.createdAt ? formatDate(notif.createdAt) : notif.timestamp || 'recent'}
+                            </span>
                           </div>
-                          <p className="text-[11px] text-findit-muted line-clamp-2 leading-relaxed">
+                          <p className="text-[11px] text-findit-muted line-clamp-2 mt-0.5 leading-snug">
                             {notif.message}
                           </p>
                         </div>
-
-                        {isUnread && (
-                          <span className="w-2 h-2 rounded-full bg-findit-primary shrink-0 mt-1.5" />
-                        )}
                       </div>
                     );
                   })
                 )}
               </div>
 
-              {/* Footer link to full notification center */}
-              <div className="p-2.5 px-4 border-t border-findit-border bg-findit-card/40 flex items-center justify-between text-xs">
+              {/* Panel Footer */}
+              <div className="p-2.5 px-4 bg-findit-bg/60 border-t border-findit-border text-center">
                 <Link
                   to="/dashboard/notifications"
                   onClick={() => setPanelOpen(false)}
-                  className="font-bold text-findit-primary hover:text-findit-primary-light flex items-center gap-1 transition-colors"
+                  className="text-xs font-semibold text-findit-primary hover:underline inline-flex items-center gap-1"
                 >
-                  <span>Open Full Notification Center</span>
+                  <span>View all notifications</span>
                   <ExternalLink className="w-3 h-3" />
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => setPanelOpen(false)}
-                  className="text-findit-muted hover:text-white text-[11px]"
-                >
-                  Close
-                </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* User Badge & Contact Settings */}
-        <div className="flex items-center gap-2 pl-2 border-l border-findit-border/80">
-          <button
-            type="button"
-            onClick={() => setContactModalOpen(true)}
-            className="flex items-center gap-2 p-1.5 -m-1.5 rounded-xl hover:bg-findit-card/80 transition-colors text-left group"
-            title="Manage Contact & WhatsApp Coordination Settings"
-          >
-            <img
-              src={user.avatarUrl || getAvatarFallback(user.fullName)}
-              alt={user.fullName}
-              className="w-8 h-8 rounded-xl object-cover border border-findit-border group-hover:border-findit-primary transition-colors"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = getAvatarFallback(user.fullName);
-              }}
-            />
-            <div className="hidden md:block text-left">
-              <span className="block text-xs font-bold text-findit-text group-hover:text-white leading-tight">
-                {user.fullName}
-              </span>
-              <span className="block text-[10px] text-findit-primary leading-tight font-medium">
-                Contact Settings
-              </span>
-            </div>
-          </button>
+        {/* Contact Preferences Trigger */}
+        <button
+          onClick={() => setContactModalOpen(true)}
+          className="p-2 rounded-xl text-findit-text bg-white border border-findit-border hover:bg-findit-secondary_bg min-w-[40px] min-h-[40px] flex items-center justify-center shadow-subtle"
+          title="Contact & Return Preferences"
+          aria-label="Contact and Return Preferences"
+        >
+          <Smartphone className="w-4 h-4 text-findit-primary" />
+        </button>
+
+        {/* User Pill */}
+        <div className="flex items-center gap-2 pl-1 border-l border-findit-border">
+          <div className="w-8 h-8 rounded-full bg-findit-primary/15 text-findit-primary font-bold text-xs flex items-center justify-center border border-findit-primary/30 shrink-0">
+            {getAvatarFallback(user.fullName)}
+          </div>
+          <div className="hidden sm:block text-left">
+            <p className="text-xs font-bold text-findit-text leading-tight truncate max-w-[120px]">
+              {user.fullName}
+            </p>
+            <p className="text-[10px] text-findit-subtle leading-tight capitalize">
+              {user.role} • {user.campus ? user.campus.split(' ')[0] : 'Campus'}
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* Contact Settings Modal */}
       <ContactSettingsModal
         isOpen={contactModalOpen}
         onClose={() => setContactModalOpen(false)}

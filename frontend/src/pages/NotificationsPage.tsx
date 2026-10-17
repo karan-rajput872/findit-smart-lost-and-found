@@ -19,15 +19,15 @@ export const NotificationsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <PageHeader
-        title="Notifications & Alerts"
-        description="Stay informed about AI potential matches, claim verification reviews, and item status changes."
+        title="Notifications & Updates"
+        description="Stay informed about smart suggestions, claim verification reviews, and return updates."
         badge={
           unreadCount > 0 ? (
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-findit-primary/20 text-findit-primary border border-findit-primary/30">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#E5EFE6] text-[#3E6B4A] border border-[#CDE1CE]">
               {unreadCount} Unread
             </span>
           ) : (
-            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-findit-border/40 text-findit-muted">
+            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-findit-bg border border-findit-border text-findit-muted">
               All Read
             </span>
           )
@@ -37,9 +37,9 @@ export const NotificationsPage: React.FC = () => {
             <button
               type="button"
               onClick={markAllNotificationsAsRead}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-findit-card hover:bg-findit-card-hover border border-findit-border text-findit-text transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-white hover:bg-findit-bg border border-findit-border text-findit-text transition-colors shadow-subtle"
             >
-              <CheckCheck className="w-3.5 h-3.5" />
+              <CheckCheck className="w-3.5 h-3.5 text-findit-primary" />
               <span>Mark all read</span>
             </button>
           )
@@ -47,14 +47,14 @@ export const NotificationsPage: React.FC = () => {
       />
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-findit-border/60 pb-3">
+      <div className="flex items-center gap-2 border-b border-findit-border pb-3">
         <button
           type="button"
           onClick={() => setFilter('all')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+          className={`px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition-all ${
             filter === 'all'
-              ? 'bg-findit-card text-white border border-findit-border'
-              : 'text-findit-muted hover:text-white'
+              ? 'bg-findit-primary text-white shadow-subtle'
+              : 'bg-white border border-findit-border text-findit-muted hover:text-findit-text hover:bg-findit-bg'
           }`}
         >
           All Notifications ({notifications.length})
@@ -62,10 +62,10 @@ export const NotificationsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setFilter('unread')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+          className={`px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold transition-all ${
             filter === 'unread'
-              ? 'bg-findit-card text-white border border-findit-border'
-              : 'text-findit-muted hover:text-white'
+              ? 'bg-findit-primary text-white shadow-subtle'
+              : 'bg-white border border-findit-border text-findit-muted hover:text-findit-text hover:bg-findit-bg'
           }`}
         >
           Unread ({unreadCount})
@@ -76,7 +76,7 @@ export const NotificationsPage: React.FC = () => {
       {displayedNotifications.length === 0 ? (
         <EmptyState
           icon={Bell}
-          title={filter === 'unread' ? 'No unread notifications' : 'No notifications found'}
+          title={filter === 'unread' ? "You're all caught up!" : "No notifications found"}
           description="You are completely caught up! New match suggestions and claim updates will appear here."
           actionText={filter === 'unread' ? 'View All Notifications' : undefined}
           onAction={filter === 'unread' ? () => setFilter('all') : undefined}
