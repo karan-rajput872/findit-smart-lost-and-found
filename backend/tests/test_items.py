@@ -316,7 +316,7 @@ def test_delete_item_not_found(client: TestClient, auth_headers: dict) -> None:
 def test_upload_image_success(client: TestClient, auth_headers: dict) -> None:
     """Verify successful image upload, safe filename generation, and static file serving."""
     import io
-    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4")
+    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82")
     files = {"file": ("test_wallet.png", dummy_png, "image/png")}
     response = client.post("/api/v1/items/upload-image", files=files, headers=auth_headers)
     assert response.status_code == 200
@@ -354,7 +354,7 @@ def test_upload_image_production_requires_cloudinary(client: TestClient, auth_he
     """Verify that production mode rejects uploads with 503 when Cloudinary is not configured."""
     import io
     from unittest.mock import patch
-    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4")
+    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82")
     files = {"file": ("item.png", dummy_png, "image/png")}
 
     with patch("app.core.config.settings.ENVIRONMENT", "production"), \
@@ -371,7 +371,7 @@ def test_upload_image_cloudinary_success(client: TestClient, auth_headers: dict)
     """Verify successful upload when Cloudinary is configured and mock uploader returns secure HTTPS URL."""
     import io
     from unittest.mock import patch
-    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4")
+    dummy_png = io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x03\x01\x01\x00\xc9\xfe\x92\xef\x00\x00\x00\x00IEND\xaeB`\x82")
     files = {"file": ("item.png", dummy_png, "image/png")}
 
     mock_result = {

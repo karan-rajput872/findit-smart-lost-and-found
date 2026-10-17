@@ -27,34 +27,72 @@ from app.services.item_repository import (
 router = APIRouter()
 
 
-def validate_image_magic_bytes(contents: bytes) -> str:
-    """Validate true file type based on binary signature (magic bytes).
+def validate_and_verify_image(contents: bytes) -> str:
+    """Validate image bytes, magic signatures, Pillow decodability, pixel bounds, and integrity.
 
-    Returns detected format ('jpeg', 'png', 'webp', or 'gif').
-    Raises HTTPException(400) if content header is invalid.
+    Guarantees:
+    - Rejection of malformed/truncated images (via verify())
+    - Protection against decompression bomb denial of service (Image.MAX_IMAGE_PIXELS = 25_000_000)
+    - Reasonable dimensions limit (max 8000x8000)
+    - Rejection of non-image executables or scripts disguised as images
     """
     if len(contents) < 12:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File content is too small or corrupted to be a valid image.",
         )
-    # JPEG (\xFF\xD8\xFF)
-    if contents[:3] == b"\xff\xd8\xff":
-        return "jpeg"
-    # PNG (\x89PNG\r\n\x1a\n)
-    if contents[:8] == b"\x89PNG\r\n\x1a\n":
-        return "png"
-    # GIF (GIF87a or GIF89a)
-    if contents[:6] in (b"GIF87a", b"GIF89a"):
-        return "gif"
-    # WEBP (RIFF....WEBP)
-    if contents[:4] == b"RIFF" and contents[8:12] == b"WEBP":
-        return "webp"
-
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Invalid file content: The file binary header does not match an allowed image format (PNG, JPEG, WEBP, GIF).",
+    # Binary magic header inspection
+    has_magic = (
+        contents[:3] == b"\xff\xd8\xff"
+        or contents[:8] == b"\x89PNG\r\n\x1a\n"
+        or contents[:6] in (b"GIF87a", b"GIF89a")
+        or (contents[:4] == b"RIFF" and contents[8:12] == b"WEBP")
     )
+    if not has_magic:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file content: The file binary header does not match an allowed image format (PNG, JPEG, WEBP, GIF).",
+        )
+
+    # Deep decoding and integrity verification via maintained PIL library
+    try:
+        from PIL import Image, ImageFile
+        import io
+
+        # Configure safe pixel limits to protect against decompression bombs
+        Image.MAX_IMAGE_PIXELS = 25_000_000
+        ImageFile.LOAD_TRUNCATED_IMAGES = False
+
+        with Image.open(io.BytesIO(contents)) as img:
+            fmt = (img.format or "").upper()
+            if fmt not in ("JPEG", "PNG", "WEBP", "GIF"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Decoded image format '{fmt}' is not supported. Allowed formats: PNG, JPEG, WEBP, GIF.",
+                )
+
+            width, height = img.size
+            if width <= 0 or height <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid image dimensions: dimensions must be greater than zero.",
+                )
+            if width > 8000 or height > 8000:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Image dimensions exceed maximum allowable limit (8000x8000 pixels).",
+                )
+
+            # Deep structure verification (detects truncated or corrupted chunks)
+            img.verify()
+            return fmt.lower()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Malformed or corrupted image file rejected: {str(e)}",
+        )
 
 
 @router.get(
@@ -220,8 +258,8 @@ async def upload_item_image(
             detail=f"File exceeds maximum allowed size of {settings.MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)}MB.",
         )
 
-    # Deep binary content inspection (magic bytes verification)
-    validate_image_magic_bytes(contents)
+    # Deep binary and structural image inspection via Pillow
+    validate_and_verify_image(contents)
 
     from app.services.storage_service import upload_image_to_storage
     try:
